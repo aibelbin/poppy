@@ -34,16 +34,19 @@ key_supabase: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 supabase: Client = create_client(url_supabase, key_supabase)
 
 
-class ReportRequest(BaseModel):
-    recievedReport: str
-    doctorid : str 
+class generateReport(BaseModel):
+    recievedReport : str
+    doctorid : str
     userid : str
-    priority : str 
-    symptoms : str 
-    name : str
-    location : str
+    symptoms : str
+    priority : str
+
+class sendEvent(BaseModel):
     description : str
+    name : str
     start_time : str
+    location : str
+
 
 def get_calendar_service():
     creds = None
@@ -97,8 +100,8 @@ def add_calendar_event(description, name, start_time, location):
     print(" Event created:")
     print(created_event.get('htmlLink'))
 
-@app.post("/send-Event/")
-async def send_event(report: ReportRequest):
+@app.post("/send-event/")
+async def send_event(report: sendEvent):
     try:
         link = add_calendar_event(
             description=report.description,
@@ -112,9 +115,9 @@ async def send_event(report: ReportRequest):
         raise HTTPException(status_code=500, detail="Failed to create calendar event.")
 
 
-@app.post("/generateReportf/")
+@app.post("/generate-report/")
 
-async def generatePdf(request: ReportRequest):
+async def generatePdf(request: generateReport):
     try: 
         key = str(uuid4()) 
         pdf_geneerated = genPdf(request.recievedReport, key + ".pdf")
