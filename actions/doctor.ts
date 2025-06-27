@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/db";
+import { eq } from "drizzle-orm";
 import { patients, doctors } from "@/db/schema";
 
 interface DoctorFormData {
@@ -11,42 +12,44 @@ interface DoctorFormData {
     email: string;
     password: string;
 }
-export const addDoctor = (formData: DoctorFormData) => {
+
+export const addDoctor = async (formData: DoctorFormData) => {
     try{
-    return db.insert(doctors).values({
-        fullName: `${formData.firstName} ${formData.lastName}`,
+    const result = await db.insert(doctors).values({
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         phoneNumber: formData.phoneNumber,
         gender: formData.gender,
         email: formData.email,
         password: formData.password,
     });
+    return result;
     } catch (error) {
         console.error("Error adding doctor:", error);
         throw new Error("Failed to add doctor");
     }
-
 }
 
-import { eq } from "drizzle-orm";
-
-export const getDoctor = (id: string) => {
+export const getDoctor = async (id: string) => {
     try {
-        return db.select()
+        const result = await db.select()
             .from(doctors)
             .where(eq(doctors.id, id))
-            .then(results => results[0]);
+            .then(results => results);
+        return result[0];
     } catch (error) {
         console.error("Error fetching doctor:", error);
         throw new Error("Failed to fetch doctor");
     }
 }
 
-export const getPatientsList = (id: string) => {
+export const getPatientsList = async (id: string) => {
     try {
-        return db.select()
+        const result = await db.select()
             .from(patients)
             .where(eq(patients.doctor, id))
             .then(results => results);
+        return result;
     } catch (error) {
         console.error("Error fetching patients list:", error);
         throw new Error("Failed to fetch patiensts list");
