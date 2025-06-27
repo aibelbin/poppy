@@ -1,7 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { User, Phone, ArrowRight, AtSign, RectangleEllipsis, ChevronLeft, ChevronRight, Check } from "lucide-react"
+import {
+  User,
+  Phone,
+  ArrowRight,
+  AtSign,
+  RectangleEllipsis,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
@@ -107,7 +116,6 @@ const RegisterPage = () => {
   const handleSubmit = () => {
     if (validateForm()) {
       setShowQuestions(true)
-      // Initialize current answer if question was already answered
       const currentQuestion = questions[currentQuestionIndex]
       setCurrentAnswer(questionAnswers[currentQuestion] || "")
     }
@@ -156,17 +164,16 @@ const RegisterPage = () => {
         personalInfo: formData,
         healthQuestions: questionAnswers,
       }
-
-      const response = await fetch("/api/register", {
+      // Submit registrationData to your backend here
+      await fetch("/api/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(registrationData),
       })
-
     } catch (error) {
-      console.error("Error submitting registration:", error)
+      // Handle error
     } finally {
       setIsSubmitting(false)
     }
@@ -176,16 +183,19 @@ const RegisterPage = () => {
   const isLastQuestion = currentQuestionIndex === questions.length - 1
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-2 sm:p-4">
       <div
-        className={`${showQuestions ? "w-full max-w-4xl" : "w-full max-w-lg"} bg-white rounded-3xl shadow-xl p-8 transition-all duration-500`}
+        className={`
+          ${showQuestions ? "w-full max-w-full sm:max-w-4xl" : "w-full max-w-full sm:max-w-lg"}
+          bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-8 transition-all duration-500
+        `}
       >
         {showQuestions ? (
-          <div className="space-y-8">
-            <div className="text-center space-y-4">
-              <h1 className="text-3xl font-bold text-gray-800">Health Assessment</h1>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="text-center space-y-2 sm:space-y-4">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">Health Assessment</h1>
+              <div className="space-y-1 sm:space-y-2">
+                <div className="flex flex-wrap justify-between text-xs sm:text-sm text-gray-600">
                   <span>
                     Question {currentQuestionIndex + 1} of {questions.length}
                   </span>
@@ -196,33 +206,32 @@ const RegisterPage = () => {
             </div>
             <Card className="border-2 border-blue-100">
               <CardHeader>
-                <CardTitle className="text-2xl text-gray-800 leading-relaxed">
+                <CardTitle className="text-lg sm:text-2xl text-gray-800 leading-relaxed">
                   {questions[currentQuestionIndex]}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6">
                 <Textarea
                   value={currentAnswer}
                   onChange={(e) => handleAnswerChange(e.target.value)}
                   placeholder="Please provide your answer here..."
-                  className="min-h-[120px] text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl resize-none"
+                  className="min-h-[80px] sm:min-h-[120px] text-base sm:text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl resize-none"
                 />
-                <div className="flex justify-between items-center pt-4">
+                <div className="flex flex-col sm:flex-row justify-between items-center pt-2 sm:pt-4 gap-2">
                   <Button
                     onClick={handlePreviousQuestion}
                     disabled={currentQuestionIndex === 0}
                     variant="outline"
-                    className="flex items-center gap-2 px-6 py-3 text-lg bg-transparent"
+                    className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg bg-transparent"
                   >
                     <ChevronLeft className="w-5 h-5" />
                     Previous
                   </Button>
-
-                  <div className="flex gap-2">
+                  <div className="flex gap-1 sm:gap-2 overflow-x-auto">
                     {questions.map((_, index) => (
                       <div
                         key={index}
-                        className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                        className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-200 ${
                           index === currentQuestionIndex
                             ? "bg-blue-600 scale-125"
                             : index < currentQuestionIndex || questionAnswers[questions[index]]
@@ -232,12 +241,11 @@ const RegisterPage = () => {
                       />
                     ))}
                   </div>
-
                   {isLastQuestion ? (
                     <Button
                       onClick={handleFinishQuestions}
                       disabled={isSubmitting || !currentAnswer.trim()}
-                      className="flex items-center gap-2 px-6 py-3 text-lg bg-green-600 hover:bg-green-700"
+                      className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg bg-green-600 hover:bg-green-700"
                     >
                       {isSubmitting ? (
                         <>
@@ -255,7 +263,7 @@ const RegisterPage = () => {
                     <Button
                       onClick={handleNextQuestion}
                       disabled={!currentAnswer.trim()}
-                      className="flex items-center gap-2 px-6 py-3 text-lg"
+                      className="flex items-center gap-2 px-4 py-2 sm:px-6 sm:py-3 text-base sm:text-lg"
                     >
                       Next
                       <ChevronRight className="w-5 h-5" />
@@ -265,124 +273,127 @@ const RegisterPage = () => {
               </CardContent>
             </Card>
             <div className="text-center">
-              <button onClick={handleNextQuestion} className="text-gray-500 hover:text-gray-700 underline text-sm">
+              <button onClick={handleNextQuestion} className="text-gray-500 hover:text-gray-700 underline text-xs sm:text-sm">
                 Skip this question
               </button>
             </div>
           </div>
         ) : (
           <>
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 transition-all duration-300">
-                <User className="w-10 h-10 text-blue-600" />
+            <div className="text-center mb-6 sm:mb-8">
+              <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full mx-auto mb-3 sm:mb-4 transition-all duration-300">
+                <User className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
               </div>
-              <h1 className="text-4xl font-bold text-gray-800 mb-2">Create Your Account</h1>
-              <p className="text-xl text-gray-600">Fill in your details to get started.</p>
+              <h1 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">Create Your Account</h1>
+              <p className="text-base sm:text-xl text-gray-600">Fill in your details to get started.</p>
             </div>
-
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               <div>
-                <label className="block text-xl font-semibold text-gray-700 mb-3">
-                  <User className="inline w-5 h-5 mr-2" />
+                <label className="block text-base sm:text-xl font-semibold text-gray-700 mb-2 sm:mb-3">
+                  <User className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   First Name
                 </label>
                 <input
                   type="text"
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className={`w-full h-16 px-5 text-xl border-3 rounded-2xl focus:outline-none transition-all duration-200 ${
-                    errors.firstName
+                  className={`
+                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    focus:outline-none transition-all duration-200
+                    ${errors.firstName
                       ? "border-red-400 focus:border-red-500 bg-red-50"
-                      : "border-gray-300 focus:border-blue-500 bg-white"
-                  }`}
+                      : "border-gray-300 focus:border-blue-500 bg-white"}
+                  `}
                   placeholder="Enter your first name"
                 />
-                {errors.firstName && <p className="text-red-600 text-lg mt-2 font-medium">{errors.firstName}</p>}
+                {errors.firstName && <p className="text-red-600 text-sm sm:text-lg mt-1 sm:mt-2 font-medium">{errors.firstName}</p>}
               </div>
-
               <div>
-                <label className="block text-xl font-semibold text-gray-700 mb-3">
-                  <User className="inline w-5 h-5 mr-2" />
+                <label className="block text-base sm:text-xl font-semibold text-gray-700 mb-2 sm:mb-3">
+                  <User className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Last Name
                 </label>
                 <input
                   type="text"
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className={`w-full h-16 px-5 text-xl border-3 rounded-2xl focus:outline-none transition-all duration-200 ${
-                    errors.lastName
+                  className={`
+                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    focus:outline-none transition-all duration-200
+                    ${errors.lastName
                       ? "border-red-400 focus:border-red-500 bg-red-50"
-                      : "border-gray-300 focus:border-blue-500 bg-white"
-                  }`}
+                      : "border-gray-300 focus:border-blue-500 bg-white"}
+                  `}
                   placeholder="Enter your last name"
                 />
-                {errors.lastName && <p className="text-red-600 text-lg mt-2 font-medium">{errors.lastName}</p>}
+                {errors.lastName && <p className="text-red-600 text-sm sm:text-lg mt-1 sm:mt-2 font-medium">{errors.lastName}</p>}
               </div>
-
               <div>
-                <label className="block text-xl font-semibold text-gray-700 mb-3">
-                  <Phone className="inline w-5 h-5 mr-2" />
+                <label className="block text-base sm:text-xl font-semibold text-gray-700 mb-2 sm:mb-3">
+                  <Phone className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Phone Number
                 </label>
                 <input
                   type="tel"
                   value={formData.phoneNumber}
                   onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                  className={`w-full h-16 px-5 text-xl border-3 rounded-2xl focus:outline-none transition-all duration-200 ${
-                    errors.phoneNumber
+                  className={`
+                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    focus:outline-none transition-all duration-200
+                    ${errors.phoneNumber
                       ? "border-red-400 focus:border-red-500 bg-red-50"
-                      : "border-gray-300 focus:border-blue-500 bg-white"
-                  }`}
+                      : "border-gray-300 focus:border-blue-500 bg-white"}
+                  `}
                   placeholder="Enter your phone number"
                 />
-                {errors.phoneNumber && <p className="text-red-600 text-lg mt-2 font-medium">{errors.phoneNumber}</p>}
+                {errors.phoneNumber && <p className="text-red-600 text-sm sm:text-lg mt-1 sm:mt-2 font-medium">{errors.phoneNumber}</p>}
               </div>
-
               <div>
-                <label className="block text-xl font-semibold text-gray-700 mb-3">
-                  <AtSign className="inline w-5 h-5 mr-2" />
+                <label className="block text-base sm:text-xl font-semibold text-gray-700 mb-2 sm:mb-3">
+                  <AtSign className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
-                  className={`w-full h-16 px-5 text-xl border-3 rounded-2xl focus:outline-none transition-all duration-200 ${
-                    errors.email
+                  className={`
+                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    focus:outline-none transition-all duration-200
+                    ${errors.email
                       ? "border-red-400 focus:border-red-500 bg-red-50"
-                      : "border-gray-300 focus:border-blue-500 bg-white"
-                  }`}
+                      : "border-gray-300 focus:border-blue-500 bg-white"}
+                  `}
                   placeholder="Enter your email address"
                 />
-                {errors.email && <p className="text-red-600 text-lg mt-2 font-medium">{errors.email}</p>}
+                {errors.email && <p className="text-red-600 text-sm sm:text-lg mt-1 sm:mt-2 font-medium">{errors.email}</p>}
               </div>
-
               <div>
-                <label className="block text-xl font-semibold text-gray-700 mb-3">
-                  <RectangleEllipsis className="inline w-5 h-5 mr-2" />
+                <label className="block text-base sm:text-xl font-semibold text-gray-700 mb-2 sm:mb-3">
+                  <RectangleEllipsis className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Password
                 </label>
                 <input
                   type="password"
                   value={formData.password}
                   onChange={(e) => handleInputChange("password", e.target.value)}
-                  className={`w-full h-16 px-5 text-xl border-3 rounded-2xl focus:outline-none transition-all duration-200 ${
-                    errors.password
+                  className={`
+                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    focus:outline-none transition-all duration-200
+                    ${errors.password
                       ? "border-red-400 focus:border-red-500 bg-red-50"
-                      : "border-gray-300 focus:border-blue-500 bg-white"
-                  }`}
+                      : "border-gray-300 focus:border-blue-500 bg-white"}
+                  `}
                   placeholder="Enter your password"
                 />
-                {errors.password && <p className="text-red-600 text-lg mt-2 font-medium">{errors.password}</p>}
+                {errors.password && <p className="text-red-600 text-sm sm:text-lg mt-1 sm:mt-2 font-medium">{errors.password}</p>}
               </div>
-
-              <div className="pt-4">
+              <div className="pt-2 sm:pt-4">
                 <button
                   onClick={handleSubmit}
-                  className="w-full h-18 bg-blue-600 text-white text-2xl font-bold rounded-2xl hover:bg-blue-700 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="w-full h-14 sm:h-18 bg-blue-600 text-white text-xl sm:text-2xl font-bold rounded-xl sm:rounded-2xl hover:bg-blue-700 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Continue
-                  <ArrowRight className="w-6 h-6 ml-3" />
                 </button>
               </div>
             </div>
