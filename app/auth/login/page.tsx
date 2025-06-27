@@ -30,7 +30,11 @@ export default function Login() {
       toast.success("Login successful!");
       Cookies.set("type", response.type, { expires: 7 });
       Cookies.set("token", response.token, { expires: 7 }); 
-      window.location.href = "/";
+     if(response.type==="doctor") {
+        window.location.href = "/doctor";
+      } else {
+        window.location.href = "/";
+      }
     } else {
       toast.error( "Login failed. Please try again.");
     }
@@ -114,7 +118,7 @@ export default function Login() {
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-center text-sm text-gray-400">
             Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="text-green-400 hover:text-green-300 font-medium transition-colors">
+            <Link href="/auth/register" className="text-green-400 hover:text-green-300 font-medium transition-colors">
               Sign up
             </Link>
           </div>

@@ -13,7 +13,7 @@ import addPersonalisation from "@/actions/personalisation";
 import { addDoctor } from "@/actions/doctor"
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import {addPrescriptions}  from "@/actions/prescriptions";
+import {addPrescriptions, getPrescriptions}  from "@/actions/prescriptions";
 import { addPatient } from "@/actions/patient"
 const questions = [
   "Do you have any known hereditary conditions?",
@@ -77,7 +77,7 @@ export default function RegisterPage() {
    const [medicines, setMedicines] = useState([
     { name: "", course: "", timing: "", stock: "" },
   ]);
-  const [medicine, setMedicine] = useState(true);
+  const [medicine, setMedicine] = useState(false);
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
@@ -141,13 +141,14 @@ export default function RegisterPage() {
       setShowQuestions(true)
       const res = await addPatient({ ...formData });
       if(res){
-        toast.success("Registered as doctor successfully!");
+        toast.success("Registered as patient successfully!");
+        window.location.href = "/auth/login";
       }else{
-        toast.error("Failed to register as doctor. Please try again.");
+        toast.error("Failed to register as patient. Please try again.");
         window.location.href = "/auth/login";
       }
     } catch (error) {
-      toast.error("Failed to register as doctor. Please try again.");
+      toast.error("Failed to register as patient. Please try again.");
       window.location.href = "/auth/login";
       console.error(error);
     }
@@ -196,11 +197,14 @@ export default function RegisterPage() {
      const res = await addDoctor({ ...formData });
      if(res){
       toast.success("Registered as doctor successfully!");
+      window.location.href = "/auth/login";
      }else{
       toast.error("Failed to register as doctor. Please try again.");
+      window.location.href = "/auth/login";
      }
    } catch (error) { 
     toast.error("Failed to register as doctor. Please try again.");
+    window.location.href = "/auth/login";
      console.error(error);
    }  
   }
@@ -238,7 +242,7 @@ export default function RegisterPage() {
     }
   }
 
-
+ 
   const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100
   const isLastQuestion = currentQuestionIndex === questions.length - 1
 

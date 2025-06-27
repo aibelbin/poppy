@@ -1,13 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Textarea } from "@/components/ui/textarea";
+import  {getPatientsList}  from "@/actions/doctor";
+import Cookies from "js-cookie";
 import {
   Stethoscope,
   Calendar,
@@ -33,22 +36,38 @@ import {
 export default function DoctorDashboard() {
   const [activeVideoCall, setActiveVideoCall] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<RecentPatient | null>(null)
-  const [isPlayingRecording, setIsPlayingRecording] = useState(false)
-
+  const [isPlayingRecording, setIsPlayingRecording] = useState(false)   
+  const [userId, setUserId] = useState<string>("");
+  const [patientsCount, setPatientsCount] = useState<number>(0);
+   useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const id = Cookies.get("userId") || "";
+        setUserId(id);
+        const list = await getPatientsList(userId);
+        setPatientsCount(list.length);
+      } catch (e) {
+        setPatientsCount(0);
+      }
+    };
+    if (userId) {
+      fetchPatients();
+    }
+  }, [userId]);
   const todayAppointments = [
     {
       id: 1,
-      patient: "John Davis",
+      patient: "Chacko",
       time: "9:00 AM",
       type: "Regular Checkup",
       status: "completed",
-      avatar: "JD",
+      avatar: "C",
       age: 72,
       condition: "Hypertension",
     },
     {
       id: 2,
-      patient: "Mary Johnson",
+      patient: "Mary Joseoh",
       time: "10:30 AM",
       type: "Follow-up",
       status: "in-progress",
@@ -58,17 +77,17 @@ export default function DoctorDashboard() {
     },
     {
       id: 3,
-      patient: "Robert Wilson",
+      patient: "Ramesh Kumar",
       time: "2:00 PM",
       type: "Consultation",
       status: "upcoming",
-      avatar: "RW",
+      avatar: "RK",
       age: 75,
       condition: "Heart Disease",
     },
     {
       id: 4,
-      patient: "Linda Brown",
+      patient: "Liya Babu",
       time: "3:30 PM",
       type: "Video Call",
       status: "upcoming",
@@ -81,41 +100,44 @@ export default function DoctorDashboard() {
   const patientRecordings = [
     {
       id: 1,
-      patient: "John Davis",
+      patient: "Chacko P",
       date: "Today, 8:30 AM",
       duration: "2:45",
       symptoms: "Chest pain, shortness of breath",
       priority: "high",
+      pdf: "",
     },
     {
       id: 2,
-      patient: "Mary Johnson",
+      patient: "Biju Thomas",
       date: "Yesterday, 3:15 PM",
       duration: "1:30",
       symptoms: "Dizziness, fatigue",
       priority: "medium",
+      pdf: "/recordings/biju-thomas.pdf",
     },
     {
       id: 3,
-      patient: "Robert Wilson",
+      patient: "Manoj G",
       date: "Yesterday, 11:20 AM",
       duration: "3:10",
       symptoms: "Joint pain, stiffness",
       priority: "low",
+      pdf: "/recordings/manoj-g.pdf",
     },
   ]
 
   const recentPatients = [
     {
-      name: "John Davis",
+      name: "Chacko P",
       age: 72,
       lastVisit: "Today",
       condition: "Hypertension",
       medicationCompliance: 95,
-      avatar: "JD",
+      avatar: "C",
     },
     {
-      name: "Mary Johnson",
+      name: "Mary Joseoh",
       age: 68,
       lastVisit: "2 days ago",
       condition: "Diabetes",
@@ -123,12 +145,12 @@ export default function DoctorDashboard() {
       avatar: "MJ",
     },
     {
-      name: "Robert Wilson",
+      name: "Ramesh Kumar",
       age: 75,
       lastVisit: "1 week ago",
       condition: "Heart Disease",
       medicationCompliance: 92,
-      avatar: "RW",
+      avatar: "RK",
     },
   ]
 
@@ -149,7 +171,7 @@ interface PatientRecording {
     date: string
     duration: string
     symptoms: string
-    priority: "high" | "medium" | "low" | string
+    pdf: string
 }
 
 interface RecentPatient {
@@ -255,7 +277,7 @@ const getPriorityColor = (priority: Priority): string => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs md:text-sm font-medium text-gray-600">Active Patients</p>
-                  <p className="text-xl md:text-3xl font-bold text-green-600">127</p>
+                  <p className="text-xl md:text-3xl font-bold text-green-600">{patientsCount}</p>
                 </div>
                 <Users className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
               </div>
@@ -383,18 +405,14 @@ const getPriorityColor = (priority: Priority): string => {
                         <strong>Symptoms:</strong> {recording.symptoms}
                       </p>
                       <div className="flex flex-wrap gap-2 md:flex-nowrap md:items-center md:space-x-3">
-                        <Button size="sm" variant="outline" className="h-8" onClick={() => setIsPlayingRecording(!isPlayingRecording)}>
-                          {isPlayingRecording ? <Pause className="w-3 h-3 md:w-4 md:h-4 mr-1" /> : <Play className="w-3 h-3 md:w-4 md:h-4 mr-1" />}
-                          {isPlayingRecording ? "Pause" : "Play"}
-                        </Button>
+                        
                         <Button size="sm" variant="outline" className="h-8">
                           <Download className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          <span className="hidden md:inline">Download</span>
+                          <Link href={recording.pdf} download>
+                            <span className="hidden md:inline">Download</span>
+                          </Link>
                         </Button>
-                        <Button size="sm" className="h-8 bg-blue-600 hover:bg-blue-700">
-                          <Calendar className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          <span className="hidden md:inline">Schedule</span>
-                        </Button>
+                        
                       </div>
                     </div>
                   ))}
