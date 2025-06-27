@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
-import { patients } from "@/db/schema";
+import { appointments, patients } from "@/db/schema";
 
 interface PatientFormData {
     firstName: string;
@@ -45,6 +45,28 @@ export const getPatient = async (id: string) => {
     }
 }
 
-export const getDoctor = (id: string) => {}
+export const getDoctor = async (id: string) => {
+    try {
+        const result = await db.select()
+            .from(patients)
+            .where(eq(patients.doctor, id))
+            .then(results => results);
+        return result;
+    } catch (error) {
+        console.error("Error fetching doctor:", error);
+        throw new Error("Failed to fetch doctor");
+    }
+}
 
-export const getAppointment = (id: string) => {}
+export const getAppointment = async (id: string) => {
+    try {
+        const result = await db.select()
+            .from(appointments)
+            .where(eq(patients.id, id))
+            .then(results => results);
+        return result;
+    } catch (error) {
+        console.error("Error fetching appointment:", error);
+        throw new Error("Failed to fetch appointment");
+    }
+}

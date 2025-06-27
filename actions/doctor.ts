@@ -2,7 +2,7 @@
 
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
-import { patients, doctors } from "@/db/schema";
+import { patients, doctors, appointments, reports } from "@/db/schema";
 
 interface DoctorFormData {
     firstName: string;
@@ -56,10 +56,41 @@ export const getPatientsList = async (id: string) => {
     }
 }
 
-export const getPatientReports = (id: string) => {
-
+export const getPatientReports = async (id: string) => {
+    try {
+        const result = await db.select()
+            .from(reports)
+            .where(eq(reports.doctor, id))
+            .then(results => results);
+        return result;
+    } catch (error) {
+        console.error("Error fetching patient reports:", error);
+        throw new Error("Failed to fetch patient reports");
+    }
 }
 
-export const getAppointment = (id: string) => {}
+export const getAppointment = async (id: string) => {
+    try {
+        const result = await db.select()
+            .from(appointments)
+            .where(eq(doctors.id, id))
+            .then(results => results);
+        return result;
+    } catch (error) {
+        console.error("Error fetching appointment:", error);
+        throw new Error("Failed to fetch appointment");
+    }
+}
 
-export const getTotalAppointments = (id: string) => {}
+export const getTotalAppointments = async (id: string) => {
+    try {
+        const result = await db.select()
+            .from(appointments)
+            .where(eq(doctors.id, id))
+            .then(results => results);
+        return result.length;
+    } catch (error) {
+        console.error("Error fetching total appointments:", error);
+        throw new Error("Failed to fetch total appointments");
+    }
+}
