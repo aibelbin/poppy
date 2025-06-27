@@ -7,18 +7,19 @@ from uuid import uuid4
 from supabase import create_client, Client
 import io 
 import os
-
-
-
-
-
+import pickle
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
+from datetime import datetime, timedelta
 
 from reportGen import genPdf
+
+SCOPES = ['https://www.googleapis.com/auth/calendar.events']
 
 app = FastAPI()
 
 public_url = "https://pub-1fd21d97a2784464bc390df565566603.r2.dev" #move to env
-
+  
 s3 = boto3.client(
     service_name ="s3",
     endpoint_url = "https://04114997135d9ee653270d71503b646e.r2.cloudflarestorage.com/poppy",
@@ -39,9 +40,79 @@ class ReportRequest(BaseModel):
     userid : str
     priority : str 
     symptoms : str 
+    name : str
+    location : str
+    description : str
+    start_time : str
+
+def get_calendar_service():
+    creds = None
+
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+
+    if not creds:
+        flow = InstalledAppFlow.from_client_secrets_file(
+            'credentials.json', SCOPES
+        )
+
+        
+        creds = flow.run_local_server(port=3000)
+
+        with open('token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+
+    return build('calendar', 'v3', credentials=creds)
+
+def add_calendar_event(description, name, start_time, location):
+    service = get_calendar_service()
+
+    start_dt = datetime.fromisoformat(start_time)
+    end_dt = start_dt + timedelta(hours=2)
+
+    event = {
+        'summary': name,
+        'location': location,
+        'description': description,
+        'start': {
+            'dateTime': start_dt.isoformat(),
+            'timeZone': 'Asia/Kolkata',
+        },
+        'end': {
+            'dateTime': end_dt.isoformat(),
+            'timeZone': 'Asia/Kolkata',
+        },
+        'reminders': {
+            'useDefault': False,
+            'overrides': [
+                {'method': 'popup', 'minutes': 30},
+                {'method': 'popup', 'minutes': 10},
+                {'method' : 'email', 'minutes': 30},
+            ],
+        },
+    }
+
+    created_event = service.events().insert(calendarId='primary', body=event).execute()
+    print(" Event created:")
+    print(created_event.get('htmlLink'))
+
+@app.post("/send-Event/")
+async def send_event(report: ReportRequest):
+    try:
+        link = add_calendar_event(
+            description=report.description,
+            name=report.name,
+            start_time=report.start_time,
+            location=report.location
+        )
+        return {"message": "Event created successfully", "link": link}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create calendar event.")
 
 
-@app.post("/genPdf/")
+@app.post("/generateReportf/")
 
 async def generatePdf(request: ReportRequest):
     try: 
