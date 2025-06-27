@@ -56,3 +56,7 @@ export const getPatientsList = (id: string) => {
 export const getPatientReports = (id: string) => {
 
 }
+
+export const getAppointment = (id: string) => {}
+
+export const getTotalAppointments = (id: string) => {}
