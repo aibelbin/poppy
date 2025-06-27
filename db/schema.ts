@@ -2,7 +2,7 @@ import { pgTable, uuid, timestamp, text, foreignKey, unique, numeric, bigint, js
 import { relations } from "drizzle-orm/relations";
 import { sql } from "drizzle-orm"
 
-export const doctor = pgTable("doctor", {
+export const doctors = pgTable("doctors", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
 	fullName: text("full_name"),
@@ -27,7 +27,7 @@ export const patients = pgTable("patients", {
 }, (table) => [
 	foreignKey({
 			columns: [table.doctor],
-			foreignColumns: [doctor.id],
+			foreignColumns: [doctors.id],
 			name: "patients_doctor_fkey"
 		}),
 	unique("patients_email_key").on(table.email),
@@ -49,14 +49,14 @@ export const personalisation = pgTable("personalisation", {
 ]);
 
 export const patientsRelations = relations(patients, ({one, many}) => ({
-	doctor: one(doctor, {
+	doctor: one(doctors, {
 		fields: [patients.doctor],
-		references: [doctor.id]
+		references: [doctors.id]
 	}),
 	personalisations: many(personalisation),
 }));
 
-export const doctorRelations = relations(doctor, ({many}) => ({
+export const doctorsRelations = relations(doctors, ({many}) => ({
 	patients: many(patients),
 }));
 
