@@ -220,7 +220,7 @@ export default function MeditationApp() {
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 flex items-center">
                   <Mic className="w-6 h-6 text-blue-600 mr-2" />
-                  Voice Symptom Recorder
+                  Ai Assistnace
                 </CardTitle>
                 <CardDescription className="text-base">
                   Describe your symptoms to help doctors understand your condition
