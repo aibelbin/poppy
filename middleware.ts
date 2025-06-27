@@ -13,7 +13,7 @@ export async function middleware(req: NextRequest) {
   const user = req.cookies.get('type')?.value;
   const { pathname } = req.nextUrl;
 
-  const publicRoutes = ['/auth/login', '/auth/register', '/'];
+  const publicRoutes = ['/auth/login', '/auth/register', '/','/doctor', '/dashboard'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
   if (!token) {
@@ -54,8 +54,6 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/',
-    '/auth/login',
-    '/auth/register',
     '/dashboard',
     '/doctor',
   ],

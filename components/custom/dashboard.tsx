@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -14,17 +16,29 @@ import {
   MessageSquare,
   Bell,
   Settings,
-  Play,
-  Pause,
   Clock,
   CheckCircle,
   AlertCircle,
   Stethoscope,
+  Camera,
+  Upload,
+  X,
+  Loader2,
 } from "lucide-react"
 
 export default function MeditationApp() {
-  const [isPlaying, setIsPlaying] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [detectedMedicines, setDetectedMedicines] = useState<
+    Array<{
+      name: string
+      confidence: number
+      dosage?: string
+      warnings?: string[]
+    }>
+  >([])
+  const [dragActive, setDragActive] = useState(false)
 
   const upcomingMeds = [
     { name: "Blood Pressure Medication", time: "2:00 PM", taken: false },
@@ -36,6 +50,73 @@ export default function MeditationApp() {
     { name: "Morning Vitamins", time: "8:00 AM", taken: true },
     { name: "Diabetes Medication", time: "12:00 PM", taken: true },
   ]
+
+  const handleImageUpload = (file: File) => {
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setUploadedImage(e.target?.result as string)
+        analyzeMedicine(file)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const analyzeMedicine = async (file: File) => {
+    setIsAnalyzing(true)
+    setDetectedMedicines([])
+
+    setTimeout(() => {
+      const mockResults = [
+        {
+          name: "Aspirin 325mg",
+          confidence: 95,
+          dosage: "Take 1 tablet daily with food",
+          warnings: ["May cause stomach irritation", "Consult doctor if pregnant"],
+        },
+        {
+          name: "Vitamin D3 1000 IU",
+          confidence: 87,
+          dosage: "Take 1 capsule daily",
+          warnings: ["Take with fat-containing meal for better absorption"],
+        },
+      ]
+      setDetectedMedicines(mockResults)
+      setIsAnalyzing(false)
+    }, 2000)
+  }
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true)
+    } else if (e.type === "dragleave") {
+      setDragActive(false)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setDragActive(false)
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleImageUpload(e.dataTransfer.files[0])
+    }
+  }
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleImageUpload(e.target.files[0])
+    }
+  }
+
+  const clearImage = () => {
+    setUploadedImage(null)
+    setDetectedMedicines([])
+    setIsAnalyzing(false)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
@@ -68,49 +149,8 @@ export default function MeditationApp() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Good Afternoon, John</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">Good Morning</h2>
           <p className="text-xl text-gray-600">How are you feeling today?</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="border-blue-200 hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6 text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Pill className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Medicine Tracker</h3>
-              <p className="text-sm text-gray-600">Track your daily medications</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-blue-200 hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6 text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Appointments</h3>
-              <p className="text-sm text-gray-600">Book doctor consultations</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-blue-200 hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6 text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Meditation</h3>
-              <p className="text-sm text-gray-600">Relax and find peace</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-blue-200 hover:shadow-lg transition-shadow cursor-pointer">
-            <CardContent className="p-6 text-center">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Mic className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Voice Symptoms</h3>
-              <p className="text-sm text-gray-600">Record your symptoms</p>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -141,7 +181,6 @@ export default function MeditationApp() {
                     </Badge>
                   </div>
                 ))}
-
                 {upcomingMeds.map((med, index) => (
                   <div
                     key={index}
@@ -161,6 +200,7 @@ export default function MeditationApp() {
                 ))}
               </CardContent>
             </Card>
+
             <Card className="border-blue-200">
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 flex items-center">
@@ -196,31 +236,100 @@ export default function MeditationApp() {
               </CardContent>
             </Card>
           </div>
+
           <div className="space-y-6">
             <Card className="border-blue-200">
               <CardHeader>
                 <CardTitle className="text-lg text-gray-900 flex items-center">
-                  <Heart className="w-5 h-5 text-blue-600 mr-2" />
-                  Daily Meditation
+                  <Camera className="w-5 h-5 text-blue-600 mr-2" />
+                  Medicine Detection
                 </CardTitle>
+                <CardDescription>Upload a photo to identify your medicines</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-center">
-                  <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    {isPlaying ? (
-                      <Pause className="w-12 h-12 text-blue-600" />
-                    ) : (
-                      <Play className="w-12 h-12 text-blue-600" />
-                    )}
+                {!uploadedImage ? (
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400"
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <div className="space-y-4">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                        <Upload className="w-8 h-8 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Drop your image here</p>
+                        <p className="text-xs text-gray-500">or click to browse</p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileInput}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <Button
+                        variant="outline"
+                        className="w-full bg-transparent"
+                        onClick={() => document.getElementById("file-upload")?.click()}
+                      >
+                        Choose File
+                      </Button>
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Morning Calm</h3>
-                  <p className="text-sm text-gray-600 mb-4">10 minutes of peaceful meditation</p>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => setIsPlaying(!isPlaying)}>
-                    {isPlaying ? "Pause" : "Play"}
-                  </Button>
-                </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <img
+                        src={uploadedImage || "/placeholder.svg"}
+                        alt="Uploaded medicine"
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <Button
+                        size="icon"
+                        variant="destructive"
+                        className="absolute top-2 right-2 w-8 h-8"
+                        onClick={clearImage}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+
+                    {isAnalyzing ? (
+                      <div className="flex items-center justify-center py-4">
+                        <Loader2 className="w-6 h-6 animate-spin text-blue-600 mr-2" />
+                        <span className="text-sm text-gray-600">Analyzing medicine...</span>
+                      </div>
+                    ) : detectedMedicines.length > 0 ? (
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-gray-900">Detected Medicines:</h4>
+                        {detectedMedicines.map((medicine, index) => (
+                          <div key={index} className="bg-green-50 p-3 rounded-lg border border-green-200">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium text-gray-900">{medicine.name}</span>
+                              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                {medicine.confidence}% match
+                              </Badge>
+                            </div>
+                            {medicine.dosage && <p className="text-sm text-gray-600 mb-1">{medicine.dosage}</p>}
+                            {medicine.warnings && medicine.warnings.length > 0 && (
+                              <div className="text-xs text-orange-600">
+                                <strong>Warnings:</strong> {medicine.warnings.join(", ")}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
               </CardContent>
             </Card>
+
             <Card className="border-blue-200">
               <CardHeader>
                 <CardTitle className="text-lg text-gray-900 flex items-center">
@@ -259,6 +368,7 @@ export default function MeditationApp() {
                 </div>
               </CardContent>
             </Card>
+
             <Card className="border-blue-200">
               <CardHeader>
                 <CardTitle className="text-lg text-gray-900 flex items-center">
@@ -289,6 +399,7 @@ export default function MeditationApp() {
             </Card>
           </div>
         </div>
+
         <Card className="mt-8 border-red-200 bg-red-50">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
