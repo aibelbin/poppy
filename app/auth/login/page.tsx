@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import Link from "next/link";
+import {login} from "@/actions/auth";
 import Cookies from "js-cookie";
 import { toast } from "sonner"
 export default function Login() {
@@ -24,14 +25,18 @@ export default function Login() {
       toast.error("Please fill in all fields");
       return
     }
-    const response = await loginUser(email, password);
+    const response = await login(email, password);
     if (response.success) {
       toast.success("Login successful!");
       Cookies.set("type", response.type, { expires: 7 });
       Cookies.set("token", response.token, { expires: 7 }); 
-      window.location.href = "/dashboard";
+     if(response.type==="doctor") {
+        window.location.href = "/doctor";
+      } else {
+        window.location.href = "/";
+      }
     } else {
-      toast.error(response.message || "Login failed. Please try again.");
+      toast.error( "Login failed. Please try again.");
     }
 
    
@@ -113,7 +118,7 @@ export default function Login() {
         <CardFooter className="flex flex-col space-y-4">
           <div className="text-center text-sm text-gray-400">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-green-400 hover:text-green-300 font-medium transition-colors">
+            <Link href="/auth/register" className="text-green-400 hover:text-green-300 font-medium transition-colors">
               Sign up
             </Link>
           </div>
@@ -121,4 +126,8 @@ export default function Login() {
       </Card>
     </div>
   )
+}
+
+function loginUser(email: string, password: string) {
+    throw new Error("Function not implemented.");
 }

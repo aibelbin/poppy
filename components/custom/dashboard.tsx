@@ -30,7 +30,8 @@ import detectMed from "@/actions/detectMed"
 export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [mark, setMark] = useState(false)
   const [detectedMedicines, setDetectedMedicines] = useState<
     Array<{
       name: string
@@ -41,11 +42,12 @@ export default function MeditationApp() {
   >([])
   const [dragActive, setDragActive] = useState(false)
 
-  const upcomingMeds = [
+  const [upcomingMeds, setUpcomingMeds] = useState([
     { name: "Blood Pressure Medication", time: "2:00 PM", taken: false },
     { name: "Vitamin D", time: "6:00 PM", taken: false },
     { name: "Heart Medication", time: "8:00 PM", taken: false },
-  ]
+  ])
+
 
   const todaysMeds = [
     { name: "Morning Vitamins", time: "8:00 AM", taken: true },
@@ -111,6 +113,8 @@ export default function MeditationApp() {
     setDetectedMedicines([])
     setIsAnalyzing(false)
   }
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
@@ -187,8 +191,19 @@ export default function MeditationApp() {
                         <p className="text-sm text-gray-600">{med.time}</p>
                       </div>
                     </div>
-                    <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                      Mark Taken
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        setUpcomingMeds((prev) =>
+                          prev.map((m, i) =>
+                            i === index ? { ...m, taken: true } : m
+                          )
+                        )
+                      }
+                      className={`bg-blue-600 hover:bg-blue-700 ${med.taken ? "opacity-50 cursor-not-allowed" : ""}`}
+                      disabled={med.taken}
+                    >
+                      {med.taken ? "Taken" : "Mark as Taken"}
                     </Button>
                   </div>
                 ))}
@@ -199,7 +214,7 @@ export default function MeditationApp() {
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 flex items-center">
                   <Mic className="w-6 h-6 text-blue-600 mr-2" />
-                  Voice Symptom Recorder
+                  Ai Assistnace
                 </CardTitle>
                 <CardDescription className="text-base">
                   Describe your symptoms to help doctors understand your condition
@@ -219,7 +234,7 @@ export default function MeditationApp() {
                       }`}
                     onClick={() => setIsRecording(!isRecording)}
                   >
-                    {isRecording ? "Stop Recording" : "Start Recording"}
+                    {isRecording ? "Calling your Ai Assistant" : "Call your Ai Assistant"}
                   </Button>
                   <p className="text-sm text-gray-600">
                     {isRecording ? "Recording your symptoms..." : "Tap to start recording your symptoms"}
@@ -343,7 +358,7 @@ export default function MeditationApp() {
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold text-gray-900">Dr. Sarah Johnson</p>
+                      <p className="font-semibold text-gray-900">Dr. Jaison Johnson</p>
                       <p className="text-sm text-gray-600">Cardiologist</p>
                     </div>
                   </div>

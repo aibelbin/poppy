@@ -1,0 +1,20 @@
+export const questions = [
+  "Do you have any known hereditary conditions?",
+  "Has anyone in your immediate family been diagnosed with serious medical conditions?",
+  "Have you ever undergone any major surgeries?",
+  "Do you have any chronic illnesses or long-term medical conditions?",
+  "Are you currently under medical treatment or taking any regular medications?",
+  "Do you have a history of diabetes?",
+  "Do you have high blood pressure?",
+  "Do you have any known heart-related conditions?",
+  "Do you have any known allergies?",
+  "Have you ever had a severe allergic reaction?",
+  "Have you been diagnosed with any mental health conditions?",
+  "Do you smoke?",
+  "Do you consume alcohol?",
+  "How often do you engage in physical activity or exercise?",
+  "What is your average sleep duration per night?",
+  "Do you have a primary doctor or family physician?",
+  "Do you have a preferred hospital or clinic for treatment?",
+  "Do you have health insurance coverage?"
+]

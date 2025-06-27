@@ -10,7 +10,18 @@ interface PrescriptionData {
     timing: Record<string, number>;
     stock: string;
 }
-
+export const getPrescriptions = async (id: string) => {
+    try {
+        const result = await db.select()
+            .from(prescriptions)
+            .where(eq(prescriptions.patient, id))
+            .then(results => results);
+        return result;
+    } catch (error) {
+        console.error("Error fetching prescriptions:", error);
+        throw new Error("Failed to fetch prescriptions");
+    }
+}
 export const addPrescriptions = async (data: PrescriptionData) => {
     try {
         const result = await db.insert(prescriptions).values({
