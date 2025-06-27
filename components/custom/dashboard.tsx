@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -25,6 +25,7 @@ import {
   X,
   Loader2,
 } from "lucide-react"
+import detectMed from "@/actions/detectMed"
 
 export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
@@ -53,39 +54,32 @@ export default function MeditationApp() {
     { name: "Diabetes Medication", time: "12:00 PM", taken: true },
   ]
 
-  const handleImageUpload = (file: File) => {
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string)
-        analyzeMedicine(file)
+  useEffect(() => {
+    const detectMedicine = async () => {
+      if (uploadedImage) {
+        setIsAnalyzing(true)
+        const med = await detectMed(uploadedImage!);
+        console.log(med)
+        setDetectedMedicines(med);
+        setIsAnalyzing(false)
       }
-      reader.readAsDataURL(file)
     }
-  }
+    detectMedicine();
+  }, [uploadedImage]);
 
-  const analyzeMedicine = async (file: File) => {
-    setIsAnalyzing(true)
-    setDetectedMedicines([])
-
-    setTimeout(() => {
-      const mockResults = [
-        {
-          name: "Aspirin 325mg",
-          confidence: 95,
-          dosage: "Take 1 tablet daily with food",
-          warnings: ["May cause stomach irritation", "Consult doctor if pregnant"],
-        },
-        {
-          name: "Vitamin D3 1000 IU",
-          confidence: 87,
-          dosage: "Take 1 capsule daily",
-          warnings: ["Take with fat-containing meal for better absorption"],
-        },
-      ]
-      setDetectedMedicines(mockResults)
-      setIsAnalyzing(false)
-    }, 2000)
+  const handleImageUpload = async (file: File) => {
+    if (file && file.type.startsWith("image/")) {
+      const promise = new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve(reader.result?.toString().split(",")[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const data = await promise.then((data: any) => data);
+      setUploadedImage(data)
+    }
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -103,13 +97,13 @@ export default function MeditationApp() {
     e.stopPropagation()
     setDragActive(false)
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files) {
       handleImageUpload(e.dataTransfer.files[0])
     }
   }
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files) {
       handleImageUpload(e.target.files[0])
     }
   }
@@ -229,17 +223,15 @@ export default function MeditationApp() {
               <CardContent>
                 <div className="text-center space-y-4">
                   <div
-                    className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto transition-colors ${
-                      isRecording ? "bg-red-100 border-4 border-red-300" : "bg-blue-100 border-4 border-blue-300"
-                    }`}
+                    className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto transition-colors ${isRecording ? "bg-red-100 border-4 border-red-300" : "bg-blue-100 border-4 border-blue-300"
+                      }`}
                   >
                     <Mic className={`w-16 h-16 ${isRecording ? "text-red-600" : "text-blue-600"}`} />
                   </div>
                   <Button
                     size="lg"
-                    className={`text-lg px-8 py-4 ${
-                      isRecording ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
-                    }`}
+                    className={`text-lg px-8 py-4 ${isRecording ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+                      }`}
                     onClick={() => setIsRecording(!isRecording)}
                   >
                     {isRecording ? "Calling your Ai Assistant" : "Call your Ai Assistant"}
@@ -264,9 +256,8 @@ export default function MeditationApp() {
               <CardContent className="space-y-4">
                 {!uploadedImage ? (
                   <div
-                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                      dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400"
-                    }`}
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400"
+                      }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
@@ -300,7 +291,7 @@ export default function MeditationApp() {
                   <div className="space-y-4">
                     <div className="relative">
                       <img
-                        src={uploadedImage || "/placeholder.svg"}
+                        src={`data:image/png;base64,${uploadedImage}` || "/placeholder.svg"}
                         alt="Uploaded medicine"
                         className="w-full h-48 object-cover rounded-lg"
                       />
@@ -333,7 +324,12 @@ export default function MeditationApp() {
                             {medicine.dosage && <p className="text-sm text-gray-600 mb-1">{medicine.dosage}</p>}
                             {medicine.warnings && medicine.warnings.length > 0 && (
                               <div className="text-xs text-orange-600">
-                                <strong>Warnings:</strong> {medicine.warnings.join(", ")}
+                                <strong>Warnings</strong>
+                                {medicine.warnings.map((warning, index) => (
+                                  <div key={index} className="text-xs text-orange-600">
+                                    {index + 1}. {warning}
+                                  </div>
+                                ))}
                               </div>
                             )}
                           </div>
