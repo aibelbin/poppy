@@ -25,7 +25,8 @@ export const addPatient = async (formData: PatientFormData) => {
         email: formData.email,
         password: formData.password,
     });
-    return result;
+    const row = await db.select().from(patients).where(eq(patients.email, formData.email));
+    return { success: true,userId: row[0].id };
     } catch (error) {
         console.error("Error adding doctor:", error);
         throw new Error("Failed to add doctor");

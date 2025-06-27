@@ -11,8 +11,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import addPersonalisation from "@/actions/personalisation";
 import { addDoctor } from "@/actions/doctor"
-import { toast } from "sonner"
-
+import { toast } from "sonner";
+import Cookies from "js-cookie";
+import {addPrescriptions}  from "@/actions/prescriptions";
+import { addPatient } from "@/actions/patient"
 const questions = [
   "Do you have any known hereditary conditions?",
   "Has anyone in your immediate family been diagnosed with serious medical conditions?",
@@ -71,15 +73,38 @@ export default function RegisterPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string>>({})
   const [currentAnswer, setCurrentAnswer] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+   const [medicines, setMedicines] = useState([
+    { name: "", course: "", timing: "", stock: "" },
+  ]);
+  const [medicine, setMedicine] = useState(true);
   const handleInputChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }))
     }
   }
+  interface Medicine {
+    name: string;
+    course: string;
+    timing: string;
+    stock: string;
+  }
 
+  type MedicineField = keyof Medicine;
+
+  const handleInputChang = (index: number, field: MedicineField, value: string) => {
+    const updated: Medicine[] = [...medicines];
+    updated[index][field] = value;
+    setMedicines(updated);
+  };
+
+  const handleAddMedicine = () => {
+    setMedicines([
+      ...medicines,
+      { name: "", course: "", timing: "", stock: "" },
+    ]);
+  };
   const validateForm = () => {
     const newErrors: FormErrors = {}
 
@@ -111,25 +136,26 @@ export default function RegisterPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = () => {
-    // try{
-    //   const res = await addPatient({ ...formData });
-    //   if(res){
-    //     toast.success("Registered as doctor successfully!");
-    //   }else{
-    //     toast.error("Failed to register as doctor. Please try again.");
-    //     window.location.href = "/auth/login";
-    //   }
-    // } catch (error) {
-    //   toast.error("Failed to register as doctor. Please try again.");
-    //   window.location.href = "/auth/login";
-    //   console.error(error);
-    // }
-    // if (validateForm()) {
-    //   setShowQuestions(true)
-    //   const currentQuestion = questions[currentQuestionIndex]
-    //   setCurrentAnswer(questionAnswers[currentQuestion] || "")
-    // }
+  const handleSubmit = async () => {
+    try{
+      setShowQuestions(true)
+      const res = await addPatient({ ...formData });
+      if(res){
+        toast.success("Registered as doctor successfully!");
+      }else{
+        toast.error("Failed to register as doctor. Please try again.");
+        window.location.href = "/auth/login";
+      }
+    } catch (error) {
+      toast.error("Failed to register as doctor. Please try again.");
+      window.location.href = "/auth/login";
+      console.error(error);
+    }
+    if (validateForm()) {
+      setShowQuestions(true)
+      const currentQuestion = questions[currentQuestionIndex]
+      setCurrentAnswer(questionAnswers[currentQuestion] || "")
+    }
   }
 
   const handleAnswerChange = (value: string) => {
@@ -166,22 +192,42 @@ export default function RegisterPage() {
     }
   }
   const handleDoctor = async () => {
-  //  try{
-  //    const res = await addDoctor({ ...formData });
-  //    if(res){
-  //     toast.success("Registered as doctor successfully!");
-  //    }else{
-  //     toast.error("Failed to register as doctor. Please try again.");
-  //    }
-  //  } catch (error) { 
-  //   toast.error("Failed to register as doctor. Please try again.");
-  //    console.error(error);
-  //  }
+  try{
+     const res = await addDoctor({ ...formData });
+     if(res){
+      toast.success("Registered as doctor successfully!");
+     }else{
+      toast.error("Failed to register as doctor. Please try again.");
+     }
+   } catch (error) { 
+    toast.error("Failed to register as doctor. Please try again.");
+     console.error(error);
+   }  
   }
-
+  const handleSendPreviousMedicines= async () => {
+    if (medicines.length === 0) {
+      toast.error("Please enter your current medicines and dosages.")
+      return
+    }
+    try {
+      const userId = Cookies.get("userId");
+      const res = await addPrescriptions(medicines, userId);
+      if (res) {
+        toast.success("Medicines saved successfully!")
+        setMedicine(false);
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Failed to save medicines. Please try again.")
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   const handleFinishQuestions = async () => {
-    saveCurrentAnswer()
+    saveCurrentAnswer();
+    setShowQuestions(false);
     setIsSubmitting(true)
+    setMedicine(true);
     try {
       const res = await addPersonalisation({ ...formData }, questionAnswers)
       if (res) toast.success("Registration completed successfully!")
@@ -208,7 +254,66 @@ export default function RegisterPage() {
 
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-indigo-500/20 rounded-3xl blur-sm" />
         <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl">
-          {showQuestions ? (
+          {medicine ? (
+            <>
+             <div>
+      <h1 className="text-xl p-6 font-medium">List your currently using medicines and their dosages</h1>
+      {medicines.map((med, idx) => (
+        <div key={idx} className="p-4 space-y-4">
+          <Label htmlFor={`medicine-${idx}`} className="text-sm font-semibold text-gray-700">
+            Medicine Name
+          </Label>
+          <Input
+            id={`medicine-${idx}`}
+            value={med.name}
+            onChange={e => handleInputChang(idx, "name", e.target.value)}
+            placeholder="Enter name of medicine"
+            className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
+          />
+          <Label htmlFor={`course-${idx}`} className="text-sm font-semibold text-gray-700">
+            Course of Medicine
+          </Label>
+          <Input
+            id={`course-${idx}`}
+            value={med.course}
+            onChange={e => handleInputChang(idx, "course", e.target.value)}
+            placeholder="Enter course of medicine"
+            className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
+          />
+          <Label htmlFor={`timing-${idx}`} className="text-sm font-semibold text-gray-700">
+            Timing of Medicine
+          </Label>
+          <Input
+            id={`timing-${idx}`}
+            value={med.timing}
+            onChange={e => handleInputChang(idx, "timing", e.target.value)}
+            placeholder="Enter timing of medicine"
+            className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
+          />
+          <Label htmlFor={`stock-${idx}`} className="text-sm font-semibold text-gray-700">
+            Stock
+          </Label>
+          <Input
+            id={`stock-${idx}`}
+            value={med.stock}
+            onChange={e => handleInputChang(idx, "stock", e.target.value)}
+            placeholder="Enter stock of medicine"
+            className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
+          />
+        </div>
+      ))}
+     <div className="flex justify-between gap-16 p-4">
+       <Button type="button" className=" ml-4" onClick={handleAddMedicine}>Add more</Button>
+      <Button
+        onClick={() => handleSendPreviousMedicines()}
+        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/25 rounded-xl px-6 py-2 font-medium transition-all duration-200"
+      >
+        Finish
+      </Button>
+     </div>
+    </div>
+            </>
+          ) : showQuestions ? (
             <div className="p-8 space-y-8">
               <CardHeader className="space-y-4 text-center p-0">
                 <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mx-auto shadow-lg shadow-blue-500/25">
@@ -315,7 +420,7 @@ export default function RegisterPage() {
               <CardContent className="space-y-6 p-0">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">
+                    <Label htmlFor="firstName" className="text-sm font  -medium text-gray-700">
                       First Name
                     </Label>
                     <div className="relative">
