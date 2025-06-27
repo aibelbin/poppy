@@ -42,7 +42,7 @@ const RegisterPage = () => {
     firstName: "",
     lastName: "",
     phoneNumber: "",
-    dateOfBirth: "",
+    age: "",
     email: "",
     password: "",
   })
@@ -58,7 +58,7 @@ const RegisterPage = () => {
     firstName: string
     lastName: string
     phoneNumber: string
-    dateOfBirth: string
+    age: string
     email: string
     password: string
   }
@@ -67,7 +67,7 @@ const RegisterPage = () => {
     firstName?: string
     lastName?: string
     phoneNumber?: string
-    dateOfBirth?: string
+    age?: string
     email?: string
     password?: string
     [key: string]: string | undefined
@@ -108,7 +108,13 @@ const RegisterPage = () => {
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters long"
     }
-
+    if (!formData.age.trim()) {
+      newErrors.age = "Please enter your age"
+    } else if (!/^\d+$/.test(formData.age)) {
+      newErrors.age = "Age must be a valid number"
+    } else if (parseInt(formData.age) <= 0 || parseInt(formData.age) > 120) {
+      newErrors.age = "Enter a valid age between 1 and 120"
+    }
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -275,7 +281,8 @@ const RegisterPage = () => {
           </div>
         ) : (
           <>
-            <div className="text-center mb-6 sm:mb-8">
+            <div >
+              <div className="text-center mb-4 sm:mb-6">
               <div className="flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-blue-100 rounded-full mx-auto mb-3 sm:mb-4 transition-all duration-300">
                 <User className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
               </div>
@@ -293,7 +300,7 @@ const RegisterPage = () => {
                   value={formData.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
                   className={`
-                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    w-full h-10 sm:h-12 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
                     focus:outline-none transition-all duration-200
                     ${errors.firstName
                       ? "border-red-400 focus:border-red-500 bg-red-50"
@@ -313,7 +320,7 @@ const RegisterPage = () => {
                   value={formData.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
                   className={`
-                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    w-full h-10 sm:h-12 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
                     focus:outline-none transition-all duration-200
                     ${errors.lastName
                       ? "border-red-400 focus:border-red-500 bg-red-50"
@@ -333,7 +340,7 @@ const RegisterPage = () => {
                   value={formData.phoneNumber}
                   onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
                   className={`
-                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    w-full h-10 sm:h-12 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
                     focus:outline-none transition-all duration-200
                     ${errors.phoneNumber
                       ? "border-red-400 focus:border-red-500 bg-red-50"
@@ -345,6 +352,30 @@ const RegisterPage = () => {
               </div>
               <div>
                 <label className="block text-base sm:text-xl font-semibold text-gray-700 mb-2 sm:mb-3">
+                  <RectangleEllipsis className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                  Age
+                </label>
+                <input
+                  type="text"
+                  value={formData.age}
+                  onChange={(e) => handleInputChange("age", e.target.value)}
+                  className={`
+                    w-full h-10 sm:h-12 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    focus:outline-none transition-all duration-200
+                    ${errors.age
+                      ? "border-red-400 focus:border-red-500 bg-red-50"
+                      : "border-gray-300 focus:border-blue-500 bg-white"}
+                  `}
+                  placeholder="Enter your age"
+                />
+                {errors.age && (
+                  <p className="text-red-600 text-sm sm:text-lg mt-1 sm:mt-2 font-medium">
+                    {errors.age}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-base sm:text-xl font-semibold text-gray-700 mb-2 sm:mb-3">
                   <AtSign className="inline w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                   Email Address
                 </label>
@@ -353,7 +384,7 @@ const RegisterPage = () => {
                   value={formData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className={`
-                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    w-full h-10 sm:h-12 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
                     focus:outline-none transition-all duration-200
                     ${errors.email
                       ? "border-red-400 focus:border-red-500 bg-red-50"
@@ -373,7 +404,7 @@ const RegisterPage = () => {
                   value={formData.password}
                   onChange={(e) => handleInputChange("password", e.target.value)}
                   className={`
-                    w-full h-12 sm:h-16 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
+                    w-full h-10 sm:h-12 px-3 sm:px-5 text-base sm:text-xl border-2 sm:border-3 rounded-xl sm:rounded-2xl
                     focus:outline-none transition-all duration-200
                     ${errors.password
                       ? "border-red-400 focus:border-red-500 bg-red-50"
@@ -386,11 +417,12 @@ const RegisterPage = () => {
               <div className="pt-2 sm:pt-4">
                 <button
                   onClick={handleSubmit}
-                  className="w-full h-14 sm:h-18 bg-blue-600 text-white text-xl sm:text-2xl font-bold rounded-xl sm:rounded-2xl hover:bg-blue-700 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="w-full h-10 sm:h-12 bg-blue-600 text-white text-xl sm:text-2xl font-bold rounded-xl sm:rounded-2xl hover:bg-blue-700 transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
                   Continue
                 </button>
               </div>
+            </div>
             </div>
           </>
         )}
