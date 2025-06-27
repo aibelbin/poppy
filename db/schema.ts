@@ -1,17 +1,39 @@
-import { pgTable, uuid, timestamp, text, foreignKey, unique, numeric, bigint, json } from "drizzle-orm/pg-core"
+import { pgTable, uuid, timestamp, text, foreignKey, bigint, unique, numeric, json } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm/relations";
 import { sql } from "drizzle-orm"
 
-export const doctor = pgTable("doctor", {
+export const doctors = pgTable("doctors", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
-	fullName: text("full_name"),
+	firstName: text("first_name"),
 	lastName: text("last_name"),
 	email: text(),
 	password: text(),
 	phoneNumber: text("phone_number"),
 	gender: text(),
 });
+
+export const reports = pgTable("reports", {
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	id: bigint({ mode: "number" }).primaryKey().generatedByDefaultAsIdentity({ name: "reports_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 9223372036854775807, cache: 1 }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	url: text(),
+	doctor: uuid(),
+	patient: uuid(),
+	priority: text(),
+	symptoms: text(),
+}, (table) => [
+	foreignKey({
+			columns: [table.doctor],
+			foreignColumns: [doctors.id],
+			name: "reports_doctor_fkey"
+		}),
+	foreignKey({
+			columns: [table.patient],
+			foreignColumns: [patients.id],
+			name: "reports_patient_fkey"
+		}),
+]);
 
 export const patients = pgTable("patients", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
@@ -27,10 +49,49 @@ export const patients = pgTable("patients", {
 }, (table) => [
 	foreignKey({
 			columns: [table.doctor],
-			foreignColumns: [doctor.id],
+			foreignColumns: [doctors.id],
 			name: "patients_doctor_fkey"
 		}),
 	unique("patients_email_key").on(table.email),
+]);
+
+export const prescriptions = pgTable("prescriptions", {
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	id: bigint({ mode: "number" }).primaryKey().generatedByDefaultAsIdentity({ name: "prescriptions_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 9223372036854775807, cache: 1 }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	patient: uuid(),
+	course: numeric(),
+	timing: json(),
+	stock: numeric(),
+}, (table) => [
+	foreignKey({
+			columns: [table.patient],
+			foreignColumns: [patients.id],
+			name: "prescriptions_patient_fkey"
+		}),
+]);
+
+export const appointments = pgTable("appointments", {
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	id: bigint({ mode: "number" }).primaryKey().generatedByDefaultAsIdentity({ name: "appointments_id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 9223372036854775807, cache: 1 }),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
+	patient: uuid(),
+	doctor: uuid(),
+	status: text(),
+	time: timestamp({ withTimezone: true, mode: 'string' }),
+	notes: text(),
+	type: text(),
+}, (table) => [
+	foreignKey({
+			columns: [table.doctor],
+			foreignColumns: [doctors.id],
+			name: "appointments_doctor_fkey"
+		}),
+	foreignKey({
+			columns: [table.patient],
+			foreignColumns: [patients.id],
+			name: "appointments_patient_fkey"
+		}),
 ]);
 
 export const personalisation = pgTable("personalisation", {
@@ -48,16 +109,50 @@ export const personalisation = pgTable("personalisation", {
 		}),
 ]);
 
-export const patientsRelations = relations(patients, ({one, many}) => ({
-	doctor: one(doctor, {
-		fields: [patients.doctor],
-		references: [doctor.id]
+export const reportsRelations = relations(reports, ({one}) => ({
+	doctor: one(doctors, {
+		fields: [reports.doctor],
+		references: [doctors.id]
 	}),
+	patient: one(patients, {
+		fields: [reports.patient],
+		references: [patients.id]
+	}),
+}));
+
+export const doctorsRelations = relations(doctors, ({many}) => ({
+	reports: many(reports),
+	patients: many(patients),
+	appointments: many(appointments),
+}));
+
+export const patientsRelations = relations(patients, ({one, many}) => ({
+	reports: many(reports),
+	doctor: one(doctors, {
+		fields: [patients.doctor],
+		references: [doctors.id]
+	}),
+	prescriptions: many(prescriptions),
+	appointments: many(appointments),
 	personalisations: many(personalisation),
 }));
 
-export const doctorRelations = relations(doctor, ({many}) => ({
-	patients: many(patients),
+export const prescriptionsRelations = relations(prescriptions, ({one}) => ({
+	patient: one(patients, {
+		fields: [prescriptions.patient],
+		references: [patients.id]
+	}),
+}));
+
+export const appointmentsRelations = relations(appointments, ({one}) => ({
+	doctor: one(doctors, {
+		fields: [appointments.doctor],
+		references: [doctors.id]
+	}),
+	patient: one(patients, {
+		fields: [appointments.patient],
+		references: [patients.id]
+	}),
 }));
 
 export const personalisationRelations = relations(personalisation, ({one}) => ({

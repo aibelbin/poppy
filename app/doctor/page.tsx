@@ -1,13 +1,16 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Textarea } from "@/components/ui/textarea";
+import  {getPatientsList}  from "@/actions/doctor";
+import Cookies from "js-cookie";
 import {
   Stethoscope,
   Calendar,
@@ -33,22 +36,38 @@ import {
 export default function DoctorDashboard() {
   const [activeVideoCall, setActiveVideoCall] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState<RecentPatient | null>(null)
-  const [isPlayingRecording, setIsPlayingRecording] = useState(false)
-
+  const [isPlayingRecording, setIsPlayingRecording] = useState(false)   
+  const [userId, setUserId] = useState<string>("");
+  const [patientsCount, setPatientsCount] = useState<number>(0);
+   useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const id = Cookies.get("userId") || "";
+        setUserId(id);
+        const list = await getPatientsList(userId);
+        setPatientsCount(list.length);
+      } catch (e) {
+        setPatientsCount(0);
+      }
+    };
+    if (userId) {
+      fetchPatients();
+    }
+  }, [userId]);
   const todayAppointments = [
     {
       id: 1,
-      patient: "John Davis",
+      patient: "Chacko",
       time: "9:00 AM",
       type: "Regular Checkup",
       status: "completed",
-      avatar: "JD",
+      avatar: "C",
       age: 72,
       condition: "Hypertension",
     },
     {
       id: 2,
-      patient: "Mary Johnson",
+      patient: "Mary Joseoh",
       time: "10:30 AM",
       type: "Follow-up",
       status: "in-progress",
@@ -58,17 +77,17 @@ export default function DoctorDashboard() {
     },
     {
       id: 3,
-      patient: "Robert Wilson",
+      patient: "Ramesh Kumar",
       time: "2:00 PM",
       type: "Consultation",
       status: "upcoming",
-      avatar: "RW",
+      avatar: "RK",
       age: 75,
       condition: "Heart Disease",
     },
     {
       id: 4,
-      patient: "Linda Brown",
+      patient: "Liya Babu",
       time: "3:30 PM",
       type: "Video Call",
       status: "upcoming",
@@ -81,41 +100,44 @@ export default function DoctorDashboard() {
   const patientRecordings = [
     {
       id: 1,
-      patient: "John Davis",
+      patient: "Chacko P",
       date: "Today, 8:30 AM",
       duration: "2:45",
       symptoms: "Chest pain, shortness of breath",
       priority: "high",
+      pdf: "",
     },
     {
       id: 2,
-      patient: "Mary Johnson",
+      patient: "Biju Thomas",
       date: "Yesterday, 3:15 PM",
       duration: "1:30",
       symptoms: "Dizziness, fatigue",
       priority: "medium",
+      pdf: "/recordings/biju-thomas.pdf",
     },
     {
       id: 3,
-      patient: "Robert Wilson",
+      patient: "Manoj G",
       date: "Yesterday, 11:20 AM",
       duration: "3:10",
       symptoms: "Joint pain, stiffness",
       priority: "low",
+      pdf: "/recordings/manoj-g.pdf",
     },
   ]
 
   const recentPatients = [
     {
-      name: "John Davis",
+      name: "Chacko P",
       age: 72,
       lastVisit: "Today",
       condition: "Hypertension",
       medicationCompliance: 95,
-      avatar: "JD",
+      avatar: "C",
     },
     {
-      name: "Mary Johnson",
+      name: "Mary Joseoh",
       age: 68,
       lastVisit: "2 days ago",
       condition: "Diabetes",
@@ -123,12 +145,12 @@ export default function DoctorDashboard() {
       avatar: "MJ",
     },
     {
-      name: "Robert Wilson",
+      name: "Ramesh Kumar",
       age: 75,
       lastVisit: "1 week ago",
       condition: "Heart Disease",
       medicationCompliance: 92,
-      avatar: "RW",
+      avatar: "RK",
     },
   ]
 
@@ -149,7 +171,7 @@ interface PatientRecording {
     date: string
     duration: string
     symptoms: string
-    priority: "high" | "medium" | "low" | string
+    pdf: string
 }
 
 interface RecentPatient {
@@ -191,7 +213,6 @@ const getPriorityColor = (priority: Priority): string => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
-      {/* Header */}
       <header className="bg-white shadow-sm border-b border-blue-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -200,8 +221,8 @@ const getPriorityColor = (priority: Priority): string => {
                 <Stethoscope className="w-5 h-5 md:w-6 md:h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl md:text-2xl font-bold text-gray-900">Doctor Portal</h1>
-                <p className="text-xs md:text-sm text-blue-600">Patient Care Management</p>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900">POPPY</h1>
+                <p className="text-xs md:text-sm text-blue-600">Doctor Panel</p>
               </div>
             </div>
             <div className="flex items-center space-x-2 md:space-x-4 w-full md:w-auto justify-between md:justify-normal">
@@ -234,13 +255,10 @@ const getPriorityColor = (priority: Priority): string => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
-        {/* Welcome Section */}
         <div className="mb-6 md:mb-8">
           <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2">Good Morning, Dr. Sarah</h2>
           <p className="text-sm md:text-xl text-gray-600">You have 4 appointments scheduled for today</p>
         </div>
-
-        {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
           <Card className="border-blue-200">
             <CardContent className="p-4 md:p-6">
@@ -259,7 +277,7 @@ const getPriorityColor = (priority: Priority): string => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs md:text-sm font-medium text-gray-600">Active Patients</p>
-                  <p className="text-xl md:text-3xl font-bold text-green-600">127</p>
+                  <p className="text-xl md:text-3xl font-bold text-green-600">{patientsCount}</p>
                 </div>
                 <Users className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
               </div>
@@ -306,8 +324,6 @@ const getPriorityColor = (priority: Priority): string => {
               Video Conference
             </TabsTrigger>
           </TabsList>
-
-          {/* Appointments Tab */}
           <TabsContent value="appointments" className="space-y-4 md:space-y-6">
             <Card className="border-blue-200">
               <CardHeader>
@@ -389,18 +405,14 @@ const getPriorityColor = (priority: Priority): string => {
                         <strong>Symptoms:</strong> {recording.symptoms}
                       </p>
                       <div className="flex flex-wrap gap-2 md:flex-nowrap md:items-center md:space-x-3">
-                        <Button size="sm" variant="outline" className="h-8" onClick={() => setIsPlayingRecording(!isPlayingRecording)}>
-                          {isPlayingRecording ? <Pause className="w-3 h-3 md:w-4 md:h-4 mr-1" /> : <Play className="w-3 h-3 md:w-4 md:h-4 mr-1" />}
-                          {isPlayingRecording ? "Pause" : "Play"}
-                        </Button>
+                        
                         <Button size="sm" variant="outline" className="h-8">
                           <Download className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          <span className="hidden md:inline">Download</span>
+                          <Link href={recording.pdf} download>
+                            <span className="hidden md:inline">Download</span>
+                          </Link>
                         </Button>
-                        <Button size="sm" className="h-8 bg-blue-600 hover:bg-blue-700">
-                          <Calendar className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                          <span className="hidden md:inline">Schedule</span>
-                        </Button>
+                        
                       </div>
                     </div>
                   ))}
@@ -505,125 +517,6 @@ const getPriorityColor = (priority: Priority): string => {
                   </CardContent>
                 </Card>
               )}
-            </div>
-          </TabsContent>
-          <TabsContent value="video" className="space-y-4 md:space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-              <div className="lg:col-span-2">
-                <Card className="border-blue-200">
-                  <CardHeader>
-                    <CardTitle className="text-lg md:text-xl text-gray-900 flex items-center">
-                      <Video className="w-5 h-5 md:w-6 md:h-6 text-blue-600 mr-2" />
-                      Video Conference
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="aspect-video bg-gray-900 rounded-lg relative overflow-hidden">
-                      {activeVideoCall ? (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <div className="text-center text-white">
-                            <Avatar className="w-16 h-16 md:w-24 md:h-24 mx-auto mb-2 md:mb-4">
-                              <AvatarFallback className="bg-blue-600 text-white text-lg md:text-2xl">MJ</AvatarFallback>
-                            </Avatar>
-                            <h3 className="text-base md:text-xl font-semibold mb-1 md:mb-2">Mary Johnson</h3>
-                            <p className="text-xs md:text-sm text-gray-300">Connected • 05:23</p>
-                          </div>
-                          <div className="absolute bottom-2 right-2 md:bottom-4 md:right-4 w-20 h-16 md:w-32 md:h-24 bg-blue-600 rounded-lg flex items-center justify-center">
-                            <Stethoscope className="w-5 h-5 md:w-8 md:h-8 text-white" />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <div className="text-center">
-                            <Video className="w-10 h-10 md:w-16 md:h-16 mx-auto mb-2 md:mb-4" />
-                            <p className="text-sm md:text-lg">No active video call</p>
-                            <p className="text-xs md:text-sm">Start a call with your patient</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex justify-center space-x-2 md:space-x-4 mt-4 md:mt-6">
-                      <Button
-                        size="sm"
-                        className={`w-10 h-10 md:w-14 md:h-14 rounded-full ${
-                          activeVideoCall ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
-                        }`}
-                        onClick={() => setActiveVideoCall(!activeVideoCall)}
-                      >
-                        {activeVideoCall ? (
-                          <Phone className="w-4 h-4 md:w-6 md:h-6 transform rotate-135" />
-                        ) : (
-                          <Video className="w-4 h-4 md:w-6 md:h-6" />
-                        )}
-                      </Button>
-                      <Button size="sm" variant="outline" className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-transparent">
-                        <Volume2 className="w-4 h-4 md:w-6 md:h-6" />
-                      </Button>
-                      <Button size="sm" variant="outline" className="w-10 h-10 md:w-14 md:h-14 rounded-full bg-transparent">
-                        <MessageSquare className="w-4 h-4 md:w-6 md:h-6" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="space-y-4 md:space-y-6">
-                <Card className="border-blue-200">
-                  <CardHeader>
-                    <CardTitle className="text-base md:text-lg text-gray-900">Waiting Patients</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2 md:space-y-3">
-                      <div className="flex items-center justify-between p-2 md:p-3 bg-blue-50 rounded-lg">
-                        <div className="flex items-center space-x-1 md:space-x-2">
-                          <Avatar className="w-7 h-7 md:w-8 md:h-8">
-                            <AvatarFallback className="bg-blue-100 text-blue-600 text-xs md:text-sm">RW</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-xs md:text-sm font-medium">Robert Wilson</p>
-                            <p className="text-xxs md:text-xs text-gray-600">Waiting 3 min</p>
-                          </div>
-                        </div>
-                        <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
-                          Join
-                        </Button>
-                      </div>
-
-                      <div className="flex items-center justify-between p-2 md:p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-1 md:space-x-2">
-                          <Avatar className="w-7 h-7 md:w-8 md:h-8">
-                            <AvatarFallback className="bg-gray-100 text-gray-600 text-xs md:text-sm">LB</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-xs md:text-sm font-medium">Linda Brown</p>
-                            <p className="text-xxs md:text-xs text-gray-600">Scheduled 3:30 PM</p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="outline">
-                          <Clock className="w-3 h-3 md:w-4 md:h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Call Notes */}
-                <Card className="border-blue-200">
-                  <CardHeader>
-                    <CardTitle className="text-base md:text-lg text-gray-900">Call Notes</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 md:space-y-4">
-                    <Textarea
-                      placeholder="Take notes during the call..."
-                      className="min-h-[80px] md:min-h-[100px] border-blue-200 focus:border-blue-400 text-sm"
-                    />
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                      <Send className="w-3 h-3 md:w-4 md:h-4 mr-1 md:mr-2" />
-                      Save Notes
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
           </TabsContent>
         </Tabs>
