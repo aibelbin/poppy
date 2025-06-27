@@ -13,11 +13,6 @@ export async function middleware(req: NextRequest) {
   const user = req.cookies.get('type')?.value;
   const { pathname } = req.nextUrl;
 
-  console.log('🔒 Middleware triggered on:', pathname);
-console.log('🍪 token:', token);
-console.log('🍪 type:', user);
-
-
   const publicRoutes = ['/auth/login', '/auth/register', '/'];
   const isPublicRoute = publicRoutes.includes(pathname);
 
