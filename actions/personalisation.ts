@@ -10,6 +10,8 @@ const google = createGoogleGenerativeAI({
 })
 
 export default async function addPersonalisation(user: Record<string, string>, data: Record<string, string>) {
+    console.log(user);
+    console.log(data);
     const result = await generateText({
         model: google("gemini-2.5-flash-preview-04-17"),
         system: `You are an AI assistant tasked with transforming raw patient registration data into a concise, natural-language memory summary. Your goal is to process the provided JSON input (which contains answers to pre-programmed registration questions) and generate a 3-4 sentence system prompt. This output will serve as a foundational context for a separate conversational AI agent, enabling it to engage with the patient in a personalized, informed, and empathetic manner.
@@ -59,7 +61,7 @@ Example Input (JSON, representing answers to pre-programmed questions):
 Example Output (3-4 Sentence System Prompt for Conversational AI):
 This patient is Mr. David Lee, an 82-year-old male with a history of Congestive Heart Failure and Arthritis, who also manages high blood pressure. He takes Furosemide, Warfarin, and Naproxen daily, and has a severe allergy to Sulfa drugs, causing rash and swelling. He quit smoking 20 years ago, engages in light walking, and experiences vision issues. His daughter, Sarah, is his emergency contact, and he prefers City General Hospital for treatment.`,
         prompt: `**Patient Info**
-Name: ${user.first_name + " " + user.last_name}
+Name: ${user.firstName + " " + user.lastName}
 Age: ${user.age}
 Gender: ${user.gender}\n\n
 

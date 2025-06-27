@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
+import addPersonalisation from "@/actions/personalisation";
+import { toast } from "sonner";
 const questions = [
   "Do you have any known hereditary conditions?",
   "Has anyone in your immediate family been diagnosed with serious medical conditions?",
@@ -164,16 +165,11 @@ const RegisterPage = () => {
         personalInfo: formData,
         healthQuestions: questionAnswers,
       }
-      // Submit registrationData to your backend here
-      await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registrationData),
-      })
+      const res = await addPersonalisation(formData, questionAnswers);
+      if(res){
+        toast.success("Registration completed successfully!");
+      }
     } catch (error) {
-      // Handle error
     } finally {
       setIsSubmitting(false)
     }
