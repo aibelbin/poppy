@@ -2,11 +2,28 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from datetime import datetime, timedelta
 import os
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 import pickle
 
 
 
+
 SCOPES = ['https://www.googleapis.com/auth/calendar.events']
+
+app = FastAPI()
+
+class ReportRequest(BaseModel):
+    name : str
+    location : str
+    description : str
+    start_time : str
+
+    
+
+
+@app.post("/sendEvent/")
 
 def get_calendar_service():
     creds = None
@@ -28,16 +45,15 @@ def get_calendar_service():
 
     return build('calendar', 'v3', credentials=creds)
 
-
-def add_calendar_event():
+def add_calendar_event(description, name, start_time, location):
     service = get_calendar_service()
 
     event = {
-        'summary': 'Doctor Appointment',
-        'location': 'City Hospital, MG Road, Kochi',
-        'description': 'Initial consultation scheduled via AI triage.',
+        'summary': name,
+        'location': location,
+        'description': description,
         'start': {
-            'dateTime': (datetime.now() + timedelta(hours=2)).isoformat(),
+            'dateTime': start_time.isoformat(),
             'timeZone': 'Asia/Kolkata',
         },
         'end': {
@@ -49,6 +65,7 @@ def add_calendar_event():
             'overrides': [
                 {'method': 'popup', 'minutes': 30},
                 {'method': 'popup', 'minutes': 10},
+               # {'email'}
             ],
         },
     }
@@ -58,5 +75,10 @@ def add_calendar_event():
     print(created_event.get('htmlLink'))
 
 
-if __name__ == '__main__':
-    add_calendar_event()
+async def postRequest(report: ReportRequest):
+     description =  report.description
+     name = report.name
+     start_time = report.start_time
+     location = report.location
+
+     add_calendar_event(description= description, name=name, start_time=start_time, location=location)
