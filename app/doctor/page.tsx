@@ -96,12 +96,12 @@ export default function DoctorDashboard() {
   const patientRecordings = [
     {
       id: 1,
-      patient: "Chacko P",
+      patient: "Aravind Manoj",
       date: "Today, 8:30 AM",
       duration: "2:45",
       symptoms: "Chest pain, shortness of breath",
       priority: "high",
-      pdf: "",
+      pdf: "https://pub-1fd21d97a2784464bc390df565566603.r2.dev/poppy/7db453fa-57a3-4135-90f1-79fb535a236f",
     },
     {
       id: 2,
@@ -110,7 +110,7 @@ export default function DoctorDashboard() {
       duration: "1:30",
       symptoms: "Dizziness, fatigue",
       priority: "medium",
-      pdf: "/recordings/biju-thomas.pdf",
+      pdf: "https://pub-1fd21d97a2784464bc390df565566603.r2.dev/poppy/7db453fa-57a3-4135-90f1-79fb535a236f",
     },
     {
       id: 3,
@@ -119,7 +119,7 @@ export default function DoctorDashboard() {
       duration: "3:10",
       symptoms: "Joint pain, stiffness",
       priority: "low",
-      pdf: "/recordings/manoj-g.pdf",
+      pdf: "https://pub-1fd21d97a2784464bc390df565566603.r2.dev/poppy/7db453fa-57a3-4135-90f1-79fb535a236f",
     },
   ]
 
@@ -257,7 +257,7 @@ const getPriorityColor = (priority: Priority): string => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8">
         <div className="mb-6 md:mb-8">
-          <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2">Good Morning, Dr. Sarah</h2>
+          <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2">Good Morning</h2>
           <p className="text-sm md:text-xl text-gray-600">You have 4 appointments scheduled for today</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
