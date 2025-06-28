@@ -69,7 +69,6 @@ Poppy transforms healthcare management through intelligent automation, providing
 - **ElevenLabs** - Premium AI voice generation and calling
 
 ### **Infrastructure & Services**
-- **AWS** - Scalable cloud hosting and services  
 - **Supabase** - Real-time database and authentication
 - **Twilio** - Voice calling and SMS notifications
 - **Custom APIs** - Healthcare provider integrations
@@ -86,7 +85,6 @@ Poppy transforms healthcare management through intelligent automation, providing
 ```bash
 - Node.js 18+ 
 - Python 3.8+
-- AWS Account
 - Supabase Project
 - Twilio Account
 - OpenAI API Key
@@ -130,8 +128,6 @@ GEMINI_API_KEY=your_gemini_key
 TWILIO_ACCOUNT_SID=your_twilio_sid
 TWILIO_AUTH_TOKEN=your_twilio_token
 ELEVENLABS_API_KEY=your_elevenlabs_key
-AWS_ACCESS_KEY_ID=your_aws_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret
 ```
 
 ---
