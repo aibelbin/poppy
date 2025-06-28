@@ -27,6 +27,8 @@ import {
   Loader2,
 } from "lucide-react"
 import { getPrescriptions } from "@/actions/prescriptions"
+import detectMed from "@/actions/detectMed"
+
 export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
@@ -86,39 +88,31 @@ const getPrescription = async (id:string) => {
   }, []);
   
 
-  const handleImageUpload = (file: File) => {
+  const handleImageUpload = async (file: File) => {
     if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setUploadedImage(e.target?.result as string)
-        analyzeMedicine(file)
+      setIsAnalyzing(true);
+      const promise = new Promise<string | undefined>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          // Get base64 string after the comma
+          resolve(reader.result?.toString().split(",")[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const data = await promise;
+      setUploadedImage(data || null);
+
+      if (data) {
+        try {
+          const med = await detectMed(data);
+          setDetectedMedicines(med);
+        } catch (error) {
+          setDetectedMedicines([]);
+        }
       }
-      reader.readAsDataURL(file)
+      setIsAnalyzing(false);
     }
-  }
-
-  const analyzeMedicine = async (file: File) => {
-    setIsAnalyzing(true)
-    setDetectedMedicines([])
-
-    setTimeout(() => {
-      const mockResults = [
-        {
-          name: "Aspirin 325mg",
-          confidence: 95,
-          dosage: "Take 1 tablet daily with food",
-          warnings: ["May cause stomach irritation", "Consult doctor if pregnant"],
-        },
-        {
-          name: "Vitamin D3 1000 IU",
-          confidence: 87,
-          dosage: "Take 1 capsule daily",
-          warnings: ["Take with fat-containing meal for better absorption"],
-        },
-      ]
-      setDetectedMedicines(mockResults)
-      setIsAnalyzing(false)
-    }, 2000)
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -136,13 +130,13 @@ const getPrescription = async (id:string) => {
     e.stopPropagation()
     setDragActive(false)
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files) {
       handleImageUpload(e.dataTransfer.files[0])
     }
   }
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files) {
       handleImageUpload(e.target.files[0])
     }
   }
@@ -271,9 +265,8 @@ const getPrescription = async (id:string) => {
                   </div>
                   <Button
                     size="lg"
-                    className={`text-lg px-8 py-4 ${
-                      isRecording ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
-                    }`}
+                    className={`text-lg px-8 py-4 ${isRecording ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
+                      }`}
                     onClick={() => setIsRecording(!isRecording)}
                   >
                     {isRecording ? "Calling your Ai Assistant" : "Call your Ai Assistant"}
@@ -298,9 +291,8 @@ const getPrescription = async (id:string) => {
               <CardContent className="space-y-4">
                 {!uploadedImage ? (
                   <div
-                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                      dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400"
-                    }`}
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400"
+                      }`}
                     onDragEnter={handleDrag}
                     onDragLeave={handleDrag}
                     onDragOver={handleDrag}
@@ -334,7 +326,7 @@ const getPrescription = async (id:string) => {
                   <div className="space-y-4">
                     <div className="relative">
                       <img
-                        src={uploadedImage || "/placeholder.svg"}
+                        src={`data:image/png;base64,${uploadedImage}` || "/placeholder.svg"}
                         alt="Uploaded medicine"
                         className="w-full h-48 object-cover rounded-lg"
                       />
@@ -367,7 +359,12 @@ const getPrescription = async (id:string) => {
                             {medicine.dosage && <p className="text-sm text-gray-600 mb-1">{medicine.dosage}</p>}
                             {medicine.warnings && medicine.warnings.length > 0 && (
                               <div className="text-xs text-orange-600">
-                                <strong>Warnings:</strong> {medicine.warnings.join(", ")}
+                                <strong>Warnings</strong>
+                                {medicine.warnings.map((warning, index) => (
+                                  <div key={index} className="text-xs text-orange-600">
+                                    {index + 1}. {warning}
+                                  </div>
+                                ))}
                               </div>
                             )}
                           </div>

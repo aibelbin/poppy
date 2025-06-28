@@ -20,10 +20,6 @@ class ReportRequest(BaseModel):
     description : str
     start_time : str
 
-    
-
-
-@app.post("/sendEvent/")
 
 def get_calendar_service():
     creds = None
@@ -48,16 +44,19 @@ def get_calendar_service():
 def add_calendar_event(description, name, start_time, location):
     service = get_calendar_service()
 
+    start_dt = datetime.fromisoformat(start_time)
+    end_dt = start_dt + timedelta(hours=2)
+
     event = {
         'summary': name,
         'location': location,
         'description': description,
         'start': {
-            'dateTime': start_time.isoformat(),
+            'dateTime': start_dt.isoformat(),
             'timeZone': 'Asia/Kolkata',
         },
         'end': {
-            'dateTime': (datetime.now() + timedelta(hours=3)).isoformat(),
+            'dateTime': end_dt.isoformat(),
             'timeZone': 'Asia/Kolkata',
         },
         'reminders': {
@@ -65,7 +64,7 @@ def add_calendar_event(description, name, start_time, location):
             'overrides': [
                 {'method': 'popup', 'minutes': 30},
                 {'method': 'popup', 'minutes': 10},
-               # {'email'}
+                {'method' : 'email', 'minutes': 30},
             ],
         },
     }
@@ -74,11 +73,18 @@ def add_calendar_event(description, name, start_time, location):
     print(" Event created:")
     print(created_event.get('htmlLink'))
 
+@app.post("/sendEvent/")
+async def send_event(report: ReportRequest):
+    try:
+        link = add_calendar_event(
+            description=report.description,
+            name=report.name,
+            start_time=report.start_time,
+            location=report.location
+        )
+        return {"message": "Event created successfully", "link": link}
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create calendar event.")
 
-async def postRequest(report: ReportRequest):
-     description =  report.description
-     name = report.name
-     start_time = report.start_time
-     location = report.location
 
-     add_calendar_event(description= description, name=name, start_time=start_time, location=location)

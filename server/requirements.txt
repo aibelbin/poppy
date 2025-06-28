@@ -4,6 +4,9 @@ python-dotenv
 twilio
 elevenlabs
 websockets
+supabase
+twilio
+python-multipart
 google-api-python-client 
 google-auth 
 google-auth-oauthlib 
