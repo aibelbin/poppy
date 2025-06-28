@@ -4,6 +4,7 @@ from datetime import datetime
 from supabase import create_client, Client
 from dotenv import load_dotenv
 import requests
+from twilio.rest import Client as TwilioClient
 
 load_dotenv()
 
@@ -11,6 +12,9 @@ url: str = os.environ.get("SUPABASE_URL")
 key: str = os.environ.get("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 triggered_events = {}
+account_sid = os.environ["TWILIO_ACCOUNT_SID"]
+auth_token = os.environ["TWILIO_AUTH_TOKEN"]
+client = Client(account_sid, auth_token)
 
 def time_diff_in_minutes(current_hhmm, key_hhmm):
     current_dt = datetime.strptime(current_hhmm, "%H%M")
