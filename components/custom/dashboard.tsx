@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import type React from "react"
@@ -34,7 +35,6 @@ export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [mark, setMark] = useState(false)
   const [detectedMedicines, setDetectedMedicines] = useState<
     Array<{
       name: string
@@ -165,7 +165,7 @@ export default function MeditationApp() {
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 flex items-center">
                   <Pill className="w-6 h-6 text-blue-600 mr-2" />
-                  Today's Medications
+                  Today&apos;s Medications
                 </CardTitle>
                 <CardDescription className="text-base">Keep track of your medicine schedule</CardDescription>
               </CardHeader>

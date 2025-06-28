@@ -13,9 +13,10 @@ import addPersonalisation from "@/actions/personalisation";
 import { addDoctor } from "@/actions/doctor"
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import { addPrescriptions, getPrescriptions } from "@/actions/prescriptions";
+import { addPrescriptions } from "@/actions/prescriptions";
 import { addPatient } from "@/actions/patient"
 import { redirect } from "next/navigation"
+
 const questions = [
   "Do you have any known hereditary conditions?",
   "Has anyone in your immediate family been diagnosed with serious medical conditions?",
@@ -213,8 +214,21 @@ export default function RegisterPage() {
     }
     try {
       const userId = Cookies.get("userId");
-      const res = await addPrescriptions(medicines, userId);
-      if (res) {
+      const prescriptions = medicines.map(med => ({
+        patient: userId,
+        medName: med.name,
+        course: med.course,
+        timing: med.timing,
+        stock: med.stock,
+      }));
+      let allSuccess = true;
+      for (const prescription of prescriptions) {
+        const res = await addPrescriptions(prescription);
+        if (!res) {
+          allSuccess = false;
+        }
+      }
+      if (allSuccess) {
         toast.success("Registration completed successfully!")
         setMedicine(false);
       }
@@ -234,7 +248,8 @@ export default function RegisterPage() {
     setIsSubmitting(true)
     setMedicine(true);
     try {
-      const res = await addPersonalisation({ ...formData }, questionAnswers)
+      const res = await addPersonalisation({ ...formData }, questionAnswers);
+      void res;
     } catch (error) {
       console.error(error)
     } finally {

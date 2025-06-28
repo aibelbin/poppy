@@ -6,7 +6,7 @@ import { prescriptions } from "@/db/schema";
 
 interface PrescriptionData {
     patient: string;
-    name: string;
+    medName: string;
     course: string;
     timing: Record<string, number>;
     stock: string;
@@ -23,11 +23,11 @@ export const getPrescriptions = async (id: string) => {
         throw new Error("Failed to fetch prescriptions");
     }
 }
-export const addPrescriptions = async (data: PrescriptionData, id: string) => {
+export const addPrescriptions = async (data: Record<string, any>) => {
     try {
         const result = await db.insert(prescriptions).values({
-            patient: id,
-            name: data.name,
+            patient: data.patient,
+            medName: data.medName,
             course: data.course,
             timing: data.timing,
             stock: data.stock,

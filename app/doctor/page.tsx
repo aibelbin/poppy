@@ -16,28 +16,21 @@ import {
   Stethoscope,
   Calendar,
   Video,
-  Phone,
   MessageSquare,
-  Clock,
   User,
   FileText,
   Pill,
   Search,
   Bell,
   Settings,
-  Play,
-  Pause,
   Volume2,
   Download,
-  Send,
   AlertTriangle,
   Users,
 } from "lucide-react"
 
 export default function DoctorDashboard() {
-  const [activeVideoCall, setActiveVideoCall] = useState(false)
-  const [selectedPatient, setSelectedPatient] = useState<RecentPatient | null>(null)
-  const [isPlayingRecording, setIsPlayingRecording] = useState(false)   
+  const [selectedPatient, setSelectedPatient] = useState<RecentPatient | null>(null);  
   const [userId, setUserId] = useState<string>("");
   const [patientsCount, setPatientsCount] = useState<number>(0);
    useEffect(() => {
@@ -48,6 +41,7 @@ export default function DoctorDashboard() {
         const list = await getPatientsList(userId);
         setPatientsCount(list.length);
       } catch (e) {
+        void e;
         setPatientsCount(0);
       }
     };
@@ -166,14 +160,7 @@ interface Appointment {
     condition: string
 }
 
-interface PatientRecording {
-    id: number
-    patient: string
-    date: string
-    duration: string
-    symptoms: string
-    pdf: string
-}
+
 
 interface RecentPatient {
     name: string
@@ -277,7 +264,7 @@ const getPriorityColor = (priority: Priority): string => {
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-gray-600">Today's Appointments</p>
+                  <p className="text-xs md:text-sm font-medium text-gray-600">Today&apos;s Appointments</p>
                   <p className="text-xl md:text-3xl font-bold text-blue-600">4</p>
                 </div>
                 <Calendar className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
@@ -339,7 +326,7 @@ const getPriorityColor = (priority: Priority): string => {
               <CardHeader>
                 <CardTitle className="text-lg md:text-xl text-gray-900 flex items-center">
                   <Calendar className="w-5 h-5 md:w-6 md:h-6 text-blue-600 mr-2" />
-                  Today's Schedule
+                  Today&apos;s Schedule
                 </CardTitle>
                 <CardDescription className="text-sm md:text-base">Manage your appointments and patient consultations</CardDescription>
               </CardHeader>
