@@ -156,7 +156,7 @@ export default function MeditationApp() {
                  Video call
                 </Link>
               </Button>
-              <Button onClick={() => {Cookies.remove("token");Cookies.remove("userId");Cookies.remove("phoneNumber")}} variant="ghost" size="icon" className="w-12 h-12">
+              <Button onClick={() => {Cookies.remove("token");Cookies.remove("userId");Cookies.remove("phoneNumber");window.location.href = "/auth/login";}} variant="ghost" size="icon" className="w-12 h-12">
                 <LogOut className="w-6 h-6 text-blue-600" />
               </Button>
               <Avatar className="w-12 h-12">
@@ -402,12 +402,9 @@ export default function MeditationApp() {
                   <div className="flex space-x-2">
                     <Button size="sm" variant="outline" className="flex-1 bg-transparent">
                       <Phone className="w-4 h-4 mr-1" />
-                      Call
+                      <Link href="tel:+919961441244">Call</Link>
                     </Button>
-                    <Button size="sm" variant="outline" className="flex-1 bg-transparent">
-                      <MessageSquare className="w-4 h-4 mr-1" />
-                      Message
-                    </Button>
+                    
                   </div>
                 </div>
               </CardContent>
