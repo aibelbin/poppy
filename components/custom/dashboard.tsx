@@ -2,11 +2,11 @@
 
 import type React from "react"
 
-import { useState,useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Cookies from "js-cookie";
 import Link from "next/link"
 import {
@@ -27,18 +27,14 @@ import {
   X,
   Loader2,
 } from "lucide-react"
-import { getPrescriptions } from "@/actions/prescriptions"
 import detectMed from "@/actions/detectMed"
+import { toast } from "sonner"
 
 export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [mark, setMark] = useState(false);
-  const [prescriptions,setPrescriptions] = useState([
-    { name: "Aspirin 325mg", dosage: "Take 1 tablet daily with food", warnings: ["May cause stomach irritation", "Consult doctor if pregnant"] },
-    { name: "Vitamin D3 1000 IU", dosage: "Take 1 capsule daily", warnings: ["Take with fat-containing meal for better absorption"] },
-  ]);
+  const [mark, setMark] = useState(false)
   const [detectedMedicines, setDetectedMedicines] = useState<
     Array<{
       name: string
@@ -55,64 +51,37 @@ export default function MeditationApp() {
     { name: "Heart Medication", time: "8:00 PM", taken: false },
   ])
 
-const getPrescription = async (id:string) => {
-   try{
-    const response = await getPrescriptions(id);
-    console.log("Fetched prescriptions:", response);
-    return response
-   }catch(error){
-    console.error("Error fetching prescriptions:", error);
-   }
-}
+
   const todaysMeds = [
     { name: "Morning Vitamins", time: "8:00 AM", taken: true },
     { name: "Diabetes Medication", time: "12:00 PM", taken: true },
   ]
 
   useEffect(() => {
-    const fetchPrescriptions = async () => {
-      const id = Cookies.get("userId");
-      if (id) {
-        const prescriptionsData = await getPrescription(id);
-        if (prescriptionsData) {
-          setPrescriptions(
-            prescriptionsData.map((item: any) => ({
-              name: item.course ?? "Unknown",
-              dosage: item.timing ?? "Unknown dosage",
-              warnings: item.stock ? [item.stock] : [],
-            }))
-          );
-        }
+    const detectMedicine = async () => {
+      if (uploadedImage) {
+        setIsAnalyzing(true)
+        const med = await detectMed(uploadedImage!);
+        console.log(med)
+        setDetectedMedicines(med);
+        setIsAnalyzing(false)
       }
     }
-    fetchPrescriptions();
-  }, []);
-  
+    detectMedicine();
+  }, [uploadedImage]);
 
   const handleImageUpload = async (file: File) => {
     if (file && file.type.startsWith("image/")) {
-      setIsAnalyzing(true);
-      const promise = new Promise<string | undefined>((resolve, reject) => {
+      const promise = new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
-          // Get base64 string after the comma
           resolve(reader.result?.toString().split(",")[1]);
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      const data = await promise;
-      setUploadedImage(data || null);
-
-      if (data) {
-        try {
-          const med = await detectMed(data);
-          setDetectedMedicines(med);
-        } catch (error) {
-          setDetectedMedicines([]);
-        }
-      }
-      setIsAnalyzing(false);
+      const data = await promise.then((data: any) => data);
+      setUploadedImage(data)
     }
   }
 
@@ -260,9 +229,8 @@ const getPrescription = async (id:string) => {
                 <div className="text-center space-y-4">
                   <div
                     className={`w-32 h-32 r
-                      ounded-full flex items-center justify-center mx-auto transition-colors ${
-                      isRecording ? "bg-red-100 border-4 border-red-300" : "bg-blue-100 border-4 border-blue-300"
-                    }`}
+                      ounded-full flex items-center justify-center mx-auto transition-colors ${isRecording ? "bg-red-100 border-4 border-red-300" : "bg-blue-100 border-4 border-blue-300"
+                      }`}
                   >
                     <Mic className={`w-16 h-16 ${isRecording ? "text-red-600" : "text-blue-600"}`} />
                   </div>
@@ -270,9 +238,23 @@ const getPrescription = async (id:string) => {
                     size="lg"
                     className={`text-lg px-8 py-4 ${isRecording ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
                       }`}
-                    onClick={() => setIsRecording(!isRecording)}
+                    onClick={async () => {
+                      const userStr = Cookies.get("userInfo");
+                      const user = userStr ? JSON.parse(userStr) : {};
+                      const formData = new FormData();
+                      formData.append("mode", "poppy");
+                      formData.append("number", user.phoneNumber || "");
+                      toast.success("AI Doctor will call you soon")
+                      await fetch("https://workable-epic-goshawk.ngrok-free.app/outbound-call", {
+                        method: "POST",
+                        // headers: {
+                        //   "Content-Type": "application/json",
+                        // },
+                        body: formData
+                      })
+                    }}
                   >
-                    {isRecording ? "Calling your Ai Assistant" : "Call your Ai Assistant"}
+                    {isRecording ? "Requesting callback from AI Doctor" : "Request callback from AI Doctor"}
                   </Button>
                   <p className="text-sm text-gray-600">
                     {isRecording ? "Recording your symptoms..." : "Tap to start recording your symptoms"}

@@ -13,8 +13,9 @@ import addPersonalisation from "@/actions/personalisation";
 import { addDoctor } from "@/actions/doctor"
 import { toast } from "sonner";
 import Cookies from "js-cookie";
-import {addPrescriptions, getPrescriptions}  from "@/actions/prescriptions";
+import { addPrescriptions, getPrescriptions } from "@/actions/prescriptions";
 import { addPatient } from "@/actions/patient"
+import { redirect } from "next/navigation"
 const questions = [
   "Do you have any known hereditary conditions?",
   "Has anyone in your immediate family been diagnosed with serious medical conditions?",
@@ -74,7 +75,7 @@ export default function RegisterPage() {
   const [questionAnswers, setQuestionAnswers] = useState<Record<string, string>>({})
   const [currentAnswer, setCurrentAnswer] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false);
-   const [medicines, setMedicines] = useState([
+  const [medicines, setMedicines] = useState([
     { name: "", course: "", timing: "", stock: "" },
   ]);
   const [medicine, setMedicine] = useState(false);
@@ -137,19 +138,16 @@ export default function RegisterPage() {
   }
 
   const handleSubmit = async () => {
-    try{
+    try {
       setShowQuestions(true)
       const res = await addPatient({ ...formData });
-      if(res){
+      if (res) {
         toast.success("Registered as patient successfully!");
-        window.location.href = "/auth/login";
-      }else{
+      } else {
         toast.error("Failed to register as patient. Please try again.");
-        window.location.href = "/auth/login";
       }
     } catch (error) {
       toast.error("Failed to register as patient. Please try again.");
-      window.location.href = "/auth/login";
       console.error(error);
     }
     if (validateForm()) {
@@ -193,22 +191,22 @@ export default function RegisterPage() {
     }
   }
   const handleDoctor = async () => {
-  try{
-     const res = await addDoctor({ ...formData });
-     if(res){
-      toast.success("Registered as doctor successfully!");
-      window.location.href = "/auth/login";
-     }else{
+    try {
+      const res = await addDoctor({ ...formData });
+      if (res) {
+        toast.success("Registered as doctor successfully!");
+        window.location.href = "/auth/login";
+      } else {
+        toast.error("Failed to register as doctor. Please try again.");
+        window.location.href = "/auth/login";
+      }
+    } catch (error) {
       toast.error("Failed to register as doctor. Please try again.");
       window.location.href = "/auth/login";
-     }
-   } catch (error) { 
-    toast.error("Failed to register as doctor. Please try again.");
-    window.location.href = "/auth/login";
-     console.error(error);
-   }  
+      console.error(error);
+    }
   }
-  const handleSendPreviousMedicines= async () => {
+  const handleSendPreviousMedicines = async () => {
     if (medicines.length === 0) {
       toast.error("Please enter your current medicines and dosages.")
       return
@@ -217,13 +215,16 @@ export default function RegisterPage() {
       const userId = Cookies.get("userId");
       const res = await addPrescriptions(medicines, userId);
       if (res) {
-        toast.success("Medicines saved successfully!")
+        toast.success("Registration completed successfully!")
         setMedicine(false);
       }
     } catch (error) {
       console.error(error)
       toast.error("Failed to save medicines. Please try again.")
     } finally {
+      setTimeout(() => {
+        redirect("/auth/login");
+      }, 2000);
       setIsSubmitting(false);
     }
   }
@@ -234,7 +235,6 @@ export default function RegisterPage() {
     setMedicine(true);
     try {
       const res = await addPersonalisation({ ...formData }, questionAnswers)
-      if (res) toast.success("Registration completed successfully!")
     } catch (error) {
       console.error(error)
     } finally {
@@ -242,7 +242,7 @@ export default function RegisterPage() {
     }
   }
 
- 
+
   const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100
   const isLastQuestion = currentQuestionIndex === questions.length - 1
 
@@ -260,62 +260,62 @@ export default function RegisterPage() {
         <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl">
           {medicine ? (
             <>
-             <div>
-      <h1 className="text-xl p-6 font-medium">List your currently using medicines and their dosages</h1>
-      {medicines.map((med, idx) => (
-        <div key={idx} className="p-4 space-y-4">
-          <Label htmlFor={`medicine-${idx}`} className="text-sm font-semibold text-gray-700">
-            Medicine Name
-          </Label>
-          <Input
-            id={`medicine-${idx}`}
-            value={med.name}
-            onChange={e => handleInputChang(idx, "name", e.target.value)}
-            placeholder="Enter name of medicine"
-            className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
-          />
-          <Label htmlFor={`course-${idx}`} className="text-sm font-semibold text-gray-700">
-            Course of Medicine
-          </Label>
-          <Input
-            id={`course-${idx}`}
-            value={med.course}
-            onChange={e => handleInputChang(idx, "course", e.target.value)}
-            placeholder="Enter course of medicine"
-            className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
-          />
-          <Label htmlFor={`timing-${idx}`} className="text-sm font-semibold text-gray-700">
-            Timing of Medicine
-          </Label>
-          <Input
-            id={`timing-${idx}`}
-            value={med.timing}
-            onChange={e => handleInputChang(idx, "timing", e.target.value)}
-            placeholder="Enter timing of medicine"
-            className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
-          />
-          <Label htmlFor={`stock-${idx}`} className="text-sm font-semibold text-gray-700">
-            Stock
-          </Label>
-          <Input
-            id={`stock-${idx}`}
-            value={med.stock}
-            onChange={e => handleInputChang(idx, "stock", e.target.value)}
-            placeholder="Enter stock of medicine"
-            className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
-          />
-        </div>
-      ))}
-     <div className="flex justify-between gap-16 p-4">
-       <Button type="button" className=" ml-4" onClick={handleAddMedicine}>Add more</Button>
-      <Button
-        onClick={() => handleSendPreviousMedicines()}
-        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/25 rounded-xl px-6 py-2 font-medium transition-all duration-200"
-      >
-        Finish
-      </Button>
-     </div>
-    </div>
+              <div>
+                <h1 className="text-xl p-6 font-medium">List your currently using medicines and their dosages</h1>
+                {medicines.map((med, idx) => (
+                  <div key={idx} className="p-4 space-y-4">
+                    <Label htmlFor={`medicine-${idx}`} className="text-sm font-semibold text-gray-700">
+                      Medicine Name
+                    </Label>
+                    <Input
+                      id={`medicine-${idx}`}
+                      value={med.name}
+                      onChange={e => handleInputChang(idx, "name", e.target.value)}
+                      placeholder="Enter name of medicine"
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
+                    />
+                    <Label htmlFor={`course-${idx}`} className="text-sm font-semibold text-gray-700">
+                      Course of Medicine
+                    </Label>
+                    <Input
+                      id={`course-${idx}`}
+                      value={med.course}
+                      onChange={e => handleInputChang(idx, "course", e.target.value)}
+                      placeholder="Enter course of medicine"
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
+                    />
+                    <Label htmlFor={`timing-${idx}`} className="text-sm font-semibold text-gray-700">
+                      Timing of Medicine
+                    </Label>
+                    <Input
+                      id={`timing-${idx}`}
+                      value={med.timing}
+                      onChange={e => handleInputChang(idx, "timing", e.target.value)}
+                      placeholder="Enter timing of medicine"
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
+                    />
+                    <Label htmlFor={`stock-${idx}`} className="text-sm font-semibold text-gray-700">
+                      Stock
+                    </Label>
+                    <Input
+                      id={`stock-${idx}`}
+                      value={med.stock}
+                      onChange={e => handleInputChang(idx, "stock", e.target.value)}
+                      placeholder="Enter stock of medicine"
+                      className="border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl"
+                    />
+                  </div>
+                ))}
+                <div className="flex justify-between gap-16 p-4">
+                  <Button type="button" className=" ml-4" onClick={handleAddMedicine}>Add more</Button>
+                  <Button
+                    onClick={() => handleSendPreviousMedicines()}
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/25 rounded-xl px-6 py-2 font-medium transition-all duration-200"
+                  >
+                    Finish
+                  </Button>
+                </div>
+              </div>
             </>
           ) : showQuestions ? (
             <div className="p-8 space-y-8">
@@ -433,9 +433,8 @@ export default function RegisterPage() {
                         id="firstName"
                         value={formData.firstName}
                         onChange={(e) => handleInputChange("firstName", e.target.value)}
-                        className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${
-                          errors.firstName ? "border-red-300 focus:border-red-500" : ""
-                        }`}
+                        className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${errors.firstName ? "border-red-300 focus:border-red-500" : ""
+                          }`}
                         placeholder="John"
                       />
                     </div>
@@ -452,9 +451,8 @@ export default function RegisterPage() {
                         id="lastName"
                         value={formData.lastName}
                         onChange={(e) => handleInputChange("lastName", e.target.value)}
-                        className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${
-                          errors.lastName ? "border-red-300 focus:border-red-500" : ""
-                        }`}
+                        className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${errors.lastName ? "border-red-300 focus:border-red-500" : ""
+                          }`}
                         placeholder="Doe"
                       />
                     </div>
@@ -473,9 +471,8 @@ export default function RegisterPage() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange("email", e.target.value)}
-                      className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${
-                        errors.email ? "border-red-300 focus:border-red-500" : ""
-                      }`}
+                      className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${errors.email ? "border-red-300 focus:border-red-500" : ""
+                        }`}
                       placeholder="john@example.com"
                     />
                   </div>
@@ -492,9 +489,8 @@ export default function RegisterPage() {
                       id="phoneNumber"
                       value={formData.phoneNumber}
                       onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-                      className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${
-                        errors.phoneNumber ? "border-red-300 focus:border-red-500" : ""
-                      }`}
+                      className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${errors.phoneNumber ? "border-red-300 focus:border-red-500" : ""
+                        }`}
                       placeholder="+1 (555) 123-4567"
                     />
                   </div>
@@ -512,9 +508,8 @@ export default function RegisterPage() {
                         id="age"
                         value={formData.age}
                         onChange={(e) => handleInputChange("age", e.target.value)}
-                        className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${
-                          errors.age ? "border-red-300 focus:border-red-500" : ""
-                        }`}
+                        className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${errors.age ? "border-red-300 focus:border-red-500" : ""
+                          }`}
                         placeholder="25"
                       />
                     </div>
@@ -530,17 +525,16 @@ export default function RegisterPage() {
                       onValueChange={(value: string) => handleInputChange("gender", value)}
                     >
                       <SelectTrigger
-                      className={`border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${
-                        errors.gender ? "border-red-300 focus:border-red-500" : ""
-                      }`}
+                        className={`border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${errors.gender ? "border-red-300 focus:border-red-500" : ""
+                          }`}
                       >
-                      <SelectValue placeholder="Select" />
+                        <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                      <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                        <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
                       </SelectContent>
                     </Select>
                     {errors.gender && <p className="text-red-500 text-xs font-medium">{errors.gender}</p>}
@@ -558,9 +552,8 @@ export default function RegisterPage() {
                       type="password"
                       value={formData.password}
                       onChange={(e) => handleInputChange("password", e.target.value)}
-                      className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${
-                        errors.password ? "border-red-300 focus:border-red-500" : ""
-                      }`}
+                      className={`pl-10 border-gray-200 focus:border-blue-500 focus:ring-blue-500/20 rounded-xl ${errors.password ? "border-red-300 focus:border-red-500" : ""
+                        }`}
                       placeholder="••••••••"
                     />
                   </div>
