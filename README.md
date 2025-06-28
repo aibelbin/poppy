@@ -1,5 +1,25 @@
 # 🌺 Poppy - AI Healthcare Companion for the Elderly
 
+![GitHub top language](https://img.shields.io/github/languages/count/aibelbin/poppy) ![GitHub last commit](https://img.shields.io/github/last-commit/aibelbin/poppy) ![TypeScript](https://img.shields.io/badge/typescript-88%25-blue)
+
+
+## Built with the tools and technologies:
+![ElevenLabs](https://img.shields.io/badge/ElevenLabs-black)
+![JSON](https://img.shields.io/badge/JSON-grey)
+![Markdown](https://img.shields.io/badge/Markdown-000000?logo=markdown)
+![npm](https://img.shields.io/badge/npm-CB3837?logo=npm&logoColor=white)
+![ENV](https://img.shields.io/badge/ENV-yellow)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?logo=supabase&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?logo=react&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-blueviolet)
+![ESLint](https://img.shields.io/badge/ESLint-4B32C3?logo=eslint&logoColor=white)
+![React Hook Form](https://img.shields.io/badge/React%20Hook%20Form-EC5990?logo=react&logoColor=white)
+![Twilio](https://img.shields.io/badge/Twilio-F22F46?logo=twilio&logoColor=white)
+
 
 
 
