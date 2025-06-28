@@ -239,26 +239,21 @@ export default function MeditationApp() {
                     className={`text-lg px-8 py-4 ${isRecording ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
                       }`}
                     onClick={async () => {
-                      const userStr = Cookies.get("userInfo");
-                      const user = userStr ? JSON.parse(userStr) : {};
+                      setIsRecording(true);
+                      const phoneNumber = Cookies.get("phoneNumber");
                       const formData = new FormData();
                       formData.append("mode", "poppy");
-                      formData.append("number", user.phoneNumber || "");
+                      formData.append("number", phoneNumber || "");
                       toast.success("AI Doctor will call you soon")
                       await fetch("https://workable-epic-goshawk.ngrok-free.app/outbound-call", {
                         method: "POST",
-                        // headers: {
-                        //   "Content-Type": "application/json",
-                        // },
                         body: formData
-                      })
+                      });
+                      setIsRecording(false);
                     }}
                   >
                     {isRecording ? "Requesting callback from AI Doctor" : "Request callback from AI Doctor"}
                   </Button>
-                  <p className="text-sm text-gray-600">
-                    {isRecording ? "Recording your symptoms..." : "Tap to start recording your symptoms"}
-                  </p>
                 </div>
               </CardContent>
             </Card>
