@@ -164,9 +164,12 @@ const getPrescription = async (id:string) => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-xs md:text-sm font-medium bg-blue-600 p-1 md:ml-0 ml-4 md:p-3 hover:bg-blue-600/50 text-white">
-                <Link href="https://meet.new" className="flex items-center justify-center ">
+              <Button variant="ghost" className="text-xs  md:text-sm font-medium bg-blue-600 p-0 md:ml-0 ml-2 md:p-3 hover:bg-blue-600/50 text-white">
+                <Link href="https://meet.new" className=" items-center md:block hidden justify-center ">
                   Emergency Video call
+                </Link>
+                <Link href="https://meet.new" className="p-3 items-center md:hidden block justify-center ">
+                 Video call
                 </Link>
               </Button>
               <Button variant="ghost" size="icon" className="w-12 h-12">

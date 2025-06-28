@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea";
 import  {getPatientsList}  from "@/actions/doctor";
 import Cookies from "js-cookie";
+import {getPatient} from "@/actions/patient";
 import {
   Stethoscope,
   Calendar,
@@ -182,7 +183,19 @@ interface RecentPatient {
     medicationCompliance: number
     avatar: string
 }
-
+const getPatientDetails = async (id: string) => {
+    try {
+        const patient = await getPatient(id);
+        console.log("Fetched patient details:", patient);
+        return patient;
+    } catch (error) {
+        console.error("Error fetching patient details:", error);
+        return null;
+    }
+}
+useEffect(() => {
+  getPatientDetails(Cookies.get("userId") || "");
+}, []);
 const getStatusColor = (status: Appointment["status"]): string => {
     switch (status) {
         case "completed":
@@ -310,18 +323,15 @@ const getPriorityColor = (priority: Priority): string => {
         </div>
 
         <Tabs defaultValue="appointments" className="space-y-4 md:space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 bg-blue-50 h-auto">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 bg-blue-50 h-auto">
             <TabsTrigger value="appointments" className="data-[state=active]:bg-white py-2 text-xs md:text-sm">
               Appointments
             </TabsTrigger>
             <TabsTrigger value="recordings" className="data-[state=active]:bg-white py-2 text-xs md:text-sm">
-              Voice Recordings
+              Patient Records
             </TabsTrigger>
             <TabsTrigger value="patients" className="data-[state=active]:bg-white py-2 text-xs md:text-sm">
               Patients
-            </TabsTrigger>
-            <TabsTrigger value="video" className="data-[state=active]:bg-white py-2 text-xs md:text-sm">
-              Video Conference
             </TabsTrigger>
           </TabsList>
           <TabsContent value="appointments" className="space-y-4 md:space-y-6">
@@ -422,7 +432,7 @@ const getPriorityColor = (priority: Priority): string => {
           </TabsContent>
 
           <TabsContent value="patients" className="space-y-4 md:space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 md:gap-6">
               <Card className="border-blue-200">
                 <CardHeader>
                   <CardTitle className="text-lg md:text-xl text-gray-900 flex items-center">

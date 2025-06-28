@@ -39,7 +39,7 @@ export const getPatient = async (id: string) => {
             .from(patients)
             .where(eq(patients.id, id))
             .then(results => results);
-        return result[0];
+        return result;
     } catch (error) {
         console.error("Error fetching patient:", error);
         throw new Error("Failed to fetch patient");
