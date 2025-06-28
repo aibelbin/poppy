@@ -288,7 +288,7 @@ const getPriorityColor = (priority: Priority): string => {
             <CardContent className="p-4 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs md:text-sm font-medium text-gray-600">Voice Recordings</p>
+                  <p className="text-xs md:text-sm font-medium text-gray-600">Records</p>
                   <p className="text-xl md:text-3xl font-bold text-orange-600">3</p>
                 </div>
                 <Volume2 className="w-6 h-6 md:w-8 md:h-8 text-orange-600" />
@@ -363,7 +363,7 @@ const getPriorityColor = (priority: Priority): string => {
                           </Button>
                           <Button size="sm" className="h-8 bg-blue-600 hover:bg-blue-700">
                             <Video className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                            <span className="hidden md:inline">Start Call</span>
+                            <Link href="https://meet.new"><span className="hidden md:inline">Start Call</span></Link>
                           </Button>
                         </div>
                       </div>
@@ -379,7 +379,7 @@ const getPriorityColor = (priority: Priority): string => {
               <CardHeader>
                 <CardTitle className="text-lg md:text-xl text-gray-900 flex items-center">
                   <Volume2 className="w-5 h-5 md:w-6 md:h-6 text-blue-600 mr-2" />
-                  Patient Voice Recordings
+                  Patient Recordings
                 </CardTitle>
                 <CardDescription className="text-sm md:text-base">Review symptom recordings from your patients</CardDescription>
               </CardHeader>
@@ -507,7 +507,7 @@ const getPriorityColor = (priority: Priority): string => {
                     <div className="flex flex-wrap gap-2 md:flex-nowrap md:space-x-2">
                       <Button size="sm" className="flex-1 bg-blue-600 hover:bg-blue-700">
                         <Video className="w-3 h-3 md:w-4 md:h-4 mr-1" />
-                        Video Call
+                                                  <Link href="https://meet.new"><span className="hidden md:inline">Start Call</span></Link>
                       </Button>
                       <Button size="sm" variant="outline" className="flex-1 bg-transparent">
                         <MessageSquare className="w-3 h-3 md:w-4 md:h-4 mr-1" />
