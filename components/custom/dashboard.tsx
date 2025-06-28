@@ -258,10 +258,10 @@ export default function MeditationApp() {
                       }`}
                     onClick={async () => {
                       setIsRecording(true);
-                      const phoneNumber = Cookies.get("phoneNumber");
+                      const userId = Cookies.get("userId");
                       const formData = new FormData();
                       formData.append("mode", "poppy");
-                      formData.append("number", phoneNumber || "");
+                      formData.append("patient_id", userId?.toString() || "");
                       toast.success("AI Doctor will call you soon")
                       await fetch("https://workable-epic-goshawk.ngrok-free.app/outbound-call", {
                         method: "POST",

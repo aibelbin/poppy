@@ -9,12 +9,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from twilio.twiml.voice_response import VoiceResponse, Connect, Stream
 from twilio.rest import Client
 from elevenlabs import ElevenLabs
-from elevenlabs.conversational_ai.conversation import Conversation
+from elevenlabs.conversational_ai.conversation import Conversation, ConversationInitiationData
 from twilio_audio_interface import TwilioAudioInterface
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 from urllib.parse import quote
+from supabase import create_client, Client as SupabaseClient
 
 load_dotenv()
+
+dynamic_vars = {}
 
 # Load environment variables
 ELEVENLABS_AGENT_ID_POPPY = os.getenv("ELEVENLABS_AGENT_ID_POPPY")
@@ -23,6 +26,10 @@ ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
+
+url: str = os.getenv("SUPABASE_URL")
+key: str = os.getenv("SUPABASE_KEY")
+supabase: SupabaseClient = create_client(url, key)
 
 # Check for required environment variables
 if not ELEVENLABS_API_KEY or not ELEVENLABS_AGENT_ID_POPPY or not ELEVENLABS_AGENT_ID_MISSDOSS:
@@ -52,10 +59,11 @@ async def root():
 @app.post("/outbound-call")
 async def outbound_call(
     mode: str = Form(...),
-    number: str = Form(...),
+    patient_id: str = Form(...),
     request: Request = None,
     twilio_client: Client = Depends(get_twilio_client)
 ):
+    global dynamic_vars
     if not TWILIO_PHONE_NUMBER:
         raise HTTPException(status_code=500, detail="Twilio phone number not configured")
     
@@ -66,10 +74,35 @@ async def outbound_call(
         else:
             twiml_url = f"https://{request.headers.get('host')}/outbound-call-twiml-missdoss"
         
+        patient_response = supabase.table('patients').select("*").eq("id", patient_id).execute()
+        patient = patient_response.data[0]
+        doctor_response = supabase.table('doctors').select("*").eq("id", patient["doctor"]).execute()
+        doctor = doctor_response.data[0]
+        personalisation_response = supabase.table('personalisation').select("*").eq("user_id", patient["id"]).execute()
+        
+        # records[patient["id"]] = patient
+        # records[doctor["id"]] = doctor
+        # personalisation[patient["id"]] = 
+        # dynamic_vars[patient["id"]] = {
+        #     "doctor": doctor,
+        #     "patient": patient,
+        #     "personalisation": personalisation_response.data[0]["data"],
+        # }
+        print("PATIENT:", patient["phone_number"])
+        dynamic_vars = {
+            "doctorid": doctor["id"],
+            "doctor_name": doctor["first_name"] + " " + doctor["last_name"],
+            "patientid": patient["id"],
+            "patient_name": patient["first_name"] + " " + patient["last_name"],
+            "patient_age": patient["age"],
+            "patient_gender": patient["gender"],
+            "patient_personalisation": personalisation_response.data[0]["data"],
+        }
+
         # Initiate the call via Twilio
         call = twilio_client.calls.create(
             from_=TWILIO_PHONE_NUMBER,
-            to=number,
+            to=patient["phone_number"],
             url=twiml_url
         )
         
@@ -139,6 +172,10 @@ async def handle_outbound_media_stream_poppy(websocket: WebSocket):
                 
                 
                 print(f"Outbound call started - StreamSid: {stream_sid}, CallSid: {call_sid}")
+
+                config = ConversationInitiationData(
+                    dynamic_variables=dynamic_vars
+                )
                 
                 # Initialize the conversation
                 try:
@@ -149,6 +186,7 @@ async def handle_outbound_media_stream_poppy(websocket: WebSocket):
                         audio_interface=audio_interface,
                         callback_agent_response=lambda text: print(f"Agent: {text}"),
                         callback_user_transcript=lambda text: print(f"User said: {text}"),
+                        config=config
                     )
 
                     conversation.start_session()
@@ -241,6 +279,9 @@ async def handle_outbound_media_stream_missdoss(websocket: WebSocket):
                 
                 print(f"Outbound call started - StreamSid: {stream_sid}, CallSid: {call_sid}")
                 
+                config = ConversationInitiationData(
+                    dynamic_variables=dynamic_vars
+                )
                 # Initialize the conversation
                 try:
                     conversation = Conversation(
@@ -250,6 +291,7 @@ async def handle_outbound_media_stream_missdoss(websocket: WebSocket):
                         audio_interface=audio_interface,
                         callback_agent_response=lambda text: print(f"Agent: {text}"),
                         callback_user_transcript=lambda text: print(f"User said: {text}"),
+                        config=config
                     )
 
                     conversation.start_session()
