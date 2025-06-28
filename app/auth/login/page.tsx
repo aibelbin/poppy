@@ -139,6 +139,3 @@ export default function Login() {
   )
 }
 
-function loginUser(email: string, password: string) {
-    throw new Error("Function not implemented.");
-}

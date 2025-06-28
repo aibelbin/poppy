@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import type React from "react"
@@ -34,7 +35,6 @@ export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [mark, setMark] = useState(false)
   const [detectedMedicines, setDetectedMedicines] = useState<
     Array<{
       name: string
@@ -133,9 +133,12 @@ export default function MeditationApp() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="text-xs md:text-sm font-medium bg-blue-600 p-1 md:ml-0 ml-4 md:p-3 hover:bg-blue-600/50 text-white">
-                <Link href="https://meet.new" className="flex items-center justify-center ">
+              <Button variant="ghost" className="text-xs  md:text-sm font-medium bg-blue-600 p-0 md:ml-0 ml-2 md:p-3 hover:bg-blue-600/50 text-white">
+                <Link href="https://meet.new" className=" items-center md:block hidden justify-center ">
                   Emergency Video call
+                </Link>
+                <Link href="https://meet.new" className="p-3 items-center md:hidden block justify-center ">
+                 Video call
                 </Link>
               </Button>
               <Button variant="ghost" size="icon" className="w-12 h-12">
@@ -162,7 +165,7 @@ export default function MeditationApp() {
               <CardHeader>
                 <CardTitle className="text-xl text-gray-900 flex items-center">
                   <Pill className="w-6 h-6 text-blue-600 mr-2" />
-                  Today's Medications
+                  Today&apos;s Medications
                 </CardTitle>
                 <CardDescription className="text-base">Keep track of your medicine schedule</CardDescription>
               </CardHeader>
