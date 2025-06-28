@@ -11,6 +11,7 @@ const google = createGoogleGenerativeAI({
 
 export default async function addPersonalisation(user: Record<string, string>, data: Record<string, string>, id?: string) {
     console.log(user);
+    console.log("id inaaa: ",id);
     console.log(data);
     const result = await generateText({
         model: google("gemini-2.5-flash-preview-04-17"),

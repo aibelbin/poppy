@@ -27,6 +27,7 @@ import {
   Download,
   AlertTriangle,
   Users,
+  LogOut,
 } from "lucide-react"
 
 export default function DoctorDashboard() {
@@ -241,8 +242,8 @@ const getPriorityColor = (priority: Priority): string => {
                     3
                   </span>
                 </Button>
-                <Button variant="ghost" size="icon" className="w-8 h-8 md:w-10 md:h-10">
-                  <Settings className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
+                <Button onClick={() => {Cookies.remove("token");Cookies.remove("userId");Cookies.remove("phoneNumber");window.location.href = "/auth/login";}} variant="ghost" size="icon" className="w-8 h-8 md:w-10 md:h-10">
+                  <LogOut className="w-4 h-4 md:w-5 md:h-5 text-blue-600" />
                 </Button>
                 <Avatar className="w-8 h-8 md:w-10 md:h-10">
                   <AvatarImage src="/placeholder-doctor.jpg" alt="Doctor" />
