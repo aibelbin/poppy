@@ -223,8 +223,10 @@ export default function MeditationApp() {
               <CardContent>
                 <div className="text-center space-y-4">
                   <div
-                    className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto transition-colors ${isRecording ? "bg-red-100 border-4 border-red-300" : "bg-blue-100 border-4 border-blue-300"
-                      }`}
+                    className={`w-32 h-32 r
+                      ounded-full flex items-center justify-center mx-auto transition-colors ${
+                      isRecording ? "bg-red-100 border-4 border-red-300" : "bg-blue-100 border-4 border-blue-300"
+                    }`}
                   >
                     <Mic className={`w-16 h-16 ${isRecording ? "text-red-600" : "text-blue-600"}`} />
                   </div>

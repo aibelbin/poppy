@@ -15,7 +15,7 @@ export const login = async (email: string, password: string) => {
             throw new Error("SECRET_KEY environment variable is not set");
         }
         console.log(result[0]);
-        const token = jwt.sign({ id: result[0].id ,type: "doctor"}, process.env.SECRET_KEY, { expiresIn: "1h" });
+        const token = jwt.sign({ id: result[0].id ,type: "doctor",name: result[0].firstName+" "+result[0].lastName ,phoneNumber: result[0].phoneNumber , email: result[0].email}, process.env.SECRET_KEY, { expiresIn: "1h" });
         return { success: true, token, type: "doctor" };
     } else {
         result = await db.select().from(patients).where(eq(patients.email, email)).then(results => results);
@@ -29,7 +29,7 @@ export const login = async (email: string, password: string) => {
     if (!process.env.SECRET_KEY) {
         throw new Error("SECRET_KEY environment variable is not set");
     }
-    const token = jwt.sign({ id: result[0].id }, process.env.SECRET_KEY, { expiresIn: "1h" });
+    const token = jwt.sign({ id: result[0].id,name: result[0].firstName+" "+result[0].lastName ,phoneNumber: result[0].phoneNumber , email: result[0].email }, process.env.SECRET_KEY, { expiresIn: "1h" });
 
     return { success: true, token, type: "patient" };
 }
