@@ -9,7 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import Cookies from "js-cookie";
-import Link from "next/link"
+import Link from "next/link";
+
+import { getPrescriptions } from "@/actions/prescriptions"
 import {
   Heart,
   Pill,
@@ -18,7 +20,6 @@ import {
   Phone,
   MessageSquare,
   Bell,
-  Settings,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -27,6 +28,7 @@ import {
   Upload,
   X,
   Loader2,
+  LogOut,
 } from "lucide-react"
 import detectMed from "@/actions/detectMed"
 import { toast } from "sonner"
@@ -35,6 +37,7 @@ export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [medicineData, setMedicineData] = useState<any>([]);
   const [detectedMedicines, setDetectedMedicines] = useState<
     Array<{
       name: string
@@ -66,7 +69,19 @@ export default function MeditationApp() {
         setDetectedMedicines(med);
         setIsAnalyzing(false)
       }
+    };
+    const medicineDataa: () => Promise<void> = async () => {
+    try{
+      const userId = Cookies.get("userId");
+      const data = await getPrescriptions(userId|| "");
+      setMedicineData(data);
+      console.log("Fetched prescriptions:", data);
+    }catch(error){
+      console.error("Error fetching prescriptions:", error);
+      toast.error("Failed to fetch prescriptions");
     }
+    }
+    medicineDataa();
     detectMedicine();
   }, [uploadedImage]);
 
@@ -141,8 +156,8 @@ export default function MeditationApp() {
                  Video call
                 </Link>
               </Button>
-              <Button variant="ghost" size="icon" className="w-12 h-12">
-                <Settings className="w-6 h-6 text-blue-600" />
+              <Button onClick={() => {Cookies.remove("token");Cookies.remove("userId");Cookies.remove("phoneNumber")}} variant="ghost" size="icon" className="w-12 h-12">
+                <LogOut className="w-6 h-6 text-blue-600" />
               </Button>
               <Avatar className="w-12 h-12">
                 <AvatarImage src="/placeholder-user.jpg" alt="User" />
@@ -423,6 +438,7 @@ export default function MeditationApp() {
                   <div className="w-12 h-6 bg-gray-300 rounded-full relative">
                     <div className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5"></div>
                   </div>
+                  <Button className="bg-blue-600 text-white">Add new medicines</Button>
                 </div>
               </CardContent>
             </Card>
@@ -443,7 +459,8 @@ export default function MeditationApp() {
               </div>
               <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white">
                 <Phone className="w-5 h-5 mr-2" />
-                Call Now
+                
+                <Link href="tel:+911">Call Now</Link>
               </Button>
             </div>
           </CardContent>

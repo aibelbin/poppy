@@ -144,6 +144,7 @@ export default function RegisterPage() {
       const res = await addPatient({ ...formData });
       if (res) {
         toast.success("Registered as patient successfully!");
+        Cookies.set("userId", res.userId, { expires: 7 });
       } else {
         toast.error("Failed to register as patient. Please try again.");
       }
@@ -248,7 +249,7 @@ export default function RegisterPage() {
     setIsSubmitting(true)
     setMedicine(true);
     try {
-      const res = await addPersonalisation({ ...formData }, questionAnswers);
+      const res = await addPersonalisation({ ...formData }, questionAnswers, Cookies.get("userId"));
       void res;
     } catch (error) {
       console.error(error)
