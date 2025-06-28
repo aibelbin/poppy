@@ -5,6 +5,7 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, WebSocket, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from twilio.twiml.voice_response import VoiceResponse, Connect, Stream
 from twilio.rest import Client
 from elevenlabs import ElevenLabs
@@ -28,6 +29,14 @@ if not ELEVENLABS_API_KEY or not ELEVENLABS_AGENT_ID_POPPY or not ELEVENLABS_AGE
     raise ValueError("Missing required ElevenLabs environment variables")
 
 app = FastAPI(title="Twilio-ElevenLabs Integration Server")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Helper function to get Twilio client
 def get_twilio_client():
