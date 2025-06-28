@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Cookies from "js-cookie";
+import Link from "next/link"
 import {
   Heart,
   Pill,
@@ -163,15 +164,17 @@ const getPrescription = async (id:string) => {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="icon" className="w-12 h-12">
-                <Bell className="w-6 h-6 text-blue-600" />
+              <Button variant="ghost" className="text-xs md:text-sm font-medium bg-blue-600 p-1 md:ml-0 ml-4 md:p-3 hover:bg-blue-600/50 text-white">
+                <Link href="https://meet.new" className="flex items-center justify-center ">
+                  Emergency Video call
+                </Link>
               </Button>
               <Button variant="ghost" size="icon" className="w-12 h-12">
                 <Settings className="w-6 h-6 text-blue-600" />
               </Button>
               <Avatar className="w-12 h-12">
                 <AvatarImage src="/placeholder-user.jpg" alt="User" />
-                <AvatarFallback className="bg-blue-100 text-blue-600">JD</AvatarFallback>
+                <AvatarFallback className="bg-blue-100 text-blue-600">P</AvatarFallback>
               </Avatar>
             </div>
           </div>

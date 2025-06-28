@@ -31,7 +31,10 @@ export default function Login() {
       toast.success("Login successful!");
       Cookies.set("type", response.type, { expires: 7 });
       Cookies.set("userId", response.id, { expires: 7 });
-      Cookies.set("userInfo", JSON.stringify({ name: response.name, phoneNumber: response.phoneNumber, email: response.email }), { expires: 7 });
+      Cookies.set("phoneNumber", response.phoneNumber ?? "", { expires: 7 });
+      Cookies.set("name", response.name, { expires: 7 });
+      Cookies.set("email", response.email ?? "", { expires: 7 });
+
       Cookies.set("token", response.token, { expires: 7 }); 
      if(response.type==="doctor") {
         window.location.href = "/doctor";
