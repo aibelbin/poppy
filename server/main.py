@@ -52,7 +52,7 @@ supabase: Client = create_client(url_supabase, key_supabase)
 class generateReport(BaseModel):
     recievedReport : str
     doctorid : str
-    userid : str
+    patientid : str
     symptoms : str
     priority : str
 
@@ -137,7 +137,7 @@ async def generatePdf(request: generateReport):
         key = str(uuid4()) 
         pdf_geneerated = genPdf(request.recievedReport, key + ".pdf")
         doctorid = request.doctorid
-        userid = request.userid
+        patientid = request.patientid
         priority = request.priority
         symptoms = request.symptoms 
 
@@ -150,7 +150,7 @@ async def generatePdf(request: generateReport):
 
         try: 
             insert_status = supabase.table('reports') \
-                .insert({"url": "https://pub-1fd21d97a2784464bc390df565566603.r2.dev"+key , "doctor" : doctorid, "patient" : userid, "priority": priority, "symptoms" : symptoms}) \
+                .insert({"url": "https://pub-1fd21d97a2784464bc390df565566603.r2.dev"+key , "doctor" : doctorid, "patient" : patientid, "priority": priority, "symptoms" : symptoms}) \
                 .execute()
         
         except Exception as error: 
