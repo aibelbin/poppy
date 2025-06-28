@@ -16,7 +16,7 @@ export const login = async (email: string, password: string) => {
         }
         console.log(result[0]);
         const token = jwt.sign({ id: result[0].id ,type: "doctor",name: result[0].firstName+" "+result[0].lastName ,phoneNumber: result[0].phoneNumber , email: result[0].email}, process.env.SECRET_KEY, { expiresIn: "1h" });
-        return { success: true, token, type: "doctor" };
+        return { success: true, token, type: "doctor", id: result[0].id, name: result[0].firstName+" "+result[0].lastName, phoneNumber: result[0].phoneNumber, email: result[0].email };
     } else {
         result = await db.select().from(patients).where(eq(patients.email, email)).then(results => results);
      
@@ -31,5 +31,5 @@ export const login = async (email: string, password: string) => {
     }
     const token = jwt.sign({ id: result[0].id,name: result[0].firstName+" "+result[0].lastName ,phoneNumber: result[0].phoneNumber , email: result[0].email }, process.env.SECRET_KEY, { expiresIn: "1h" });
 
-    return { success: true, token, type: "patient" };
+    return { success: true, token, type: "patient", id: result[0].id ,name: result[0].firstName+" "+result[0].lastName ,phoneNumber: result[0].phoneNumber , email: result[0].email};
 }

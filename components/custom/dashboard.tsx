@@ -2,11 +2,12 @@
 
 import type React from "react"
 
-import { useEffect, useState } from "react"
+import { useState,useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Cookies from "js-cookie";
 import {
   Heart,
   Pill,
@@ -25,13 +26,18 @@ import {
   X,
   Loader2,
 } from "lucide-react"
+import { getPrescriptions } from "@/actions/prescriptions"
 import detectMed from "@/actions/detectMed"
 
 export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [mark, setMark] = useState(false)
+  const [mark, setMark] = useState(false);
+  const [prescriptions,setPrescriptions] = useState([
+    { name: "Aspirin 325mg", dosage: "Take 1 tablet daily with food", warnings: ["May cause stomach irritation", "Consult doctor if pregnant"] },
+    { name: "Vitamin D3 1000 IU", dosage: "Take 1 capsule daily", warnings: ["Take with fat-containing meal for better absorption"] },
+  ]);
   const [detectedMedicines, setDetectedMedicines] = useState<
     Array<{
       name: string
@@ -48,37 +54,64 @@ export default function MeditationApp() {
     { name: "Heart Medication", time: "8:00 PM", taken: false },
   ])
 
-
+const getPrescription = async (id:string) => {
+   try{
+    const response = await getPrescriptions(id);
+    console.log("Fetched prescriptions:", response);
+    return response
+   }catch(error){
+    console.error("Error fetching prescriptions:", error);
+   }
+}
   const todaysMeds = [
     { name: "Morning Vitamins", time: "8:00 AM", taken: true },
     { name: "Diabetes Medication", time: "12:00 PM", taken: true },
   ]
 
   useEffect(() => {
-    const detectMedicine = async () => {
-      if (uploadedImage) {
-        setIsAnalyzing(true)
-        const med = await detectMed(uploadedImage!);
-        console.log(med)
-        setDetectedMedicines(med);
-        setIsAnalyzing(false)
+    const fetchPrescriptions = async () => {
+      const id = Cookies.get("userId");
+      if (id) {
+        const prescriptionsData = await getPrescription(id);
+        if (prescriptionsData) {
+          setPrescriptions(
+            prescriptionsData.map((item: any) => ({
+              name: item.course ?? "Unknown",
+              dosage: item.timing ?? "Unknown dosage",
+              warnings: item.stock ? [item.stock] : [],
+            }))
+          );
+        }
       }
     }
-    detectMedicine();
-  }, [uploadedImage]);
+    fetchPrescriptions();
+  }, []);
+  
 
   const handleImageUpload = async (file: File) => {
     if (file && file.type.startsWith("image/")) {
-      const promise = new Promise((resolve, reject) => {
+      setIsAnalyzing(true);
+      const promise = new Promise<string | undefined>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
+          // Get base64 string after the comma
           resolve(reader.result?.toString().split(",")[1]);
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
-      const data = await promise.then((data: any) => data);
-      setUploadedImage(data)
+      const data = await promise;
+      setUploadedImage(data || null);
+
+      if (data) {
+        try {
+          const med = await detectMed(data);
+          setDetectedMedicines(med);
+        } catch (error) {
+          setDetectedMedicines([]);
+        }
+      }
+      setIsAnalyzing(false);
     }
   }
 
