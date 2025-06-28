@@ -2,11 +2,12 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Cookies from "js-cookie";
 import {
   Heart,
   Pill,
@@ -25,12 +26,16 @@ import {
   X,
   Loader2,
 } from "lucide-react"
-
+import { getPrescriptions } from "@/actions/prescriptions"
 export default function MeditationApp() {
   const [isRecording, setIsRecording] = useState(false)
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [mark, setMark] = useState(false)
+  const [mark, setMark] = useState(false);
+  const [prescriptions,setPrescriptions] = useState([
+    { name: "Aspirin 325mg", dosage: "Take 1 tablet daily with food", warnings: ["May cause stomach irritation", "Consult doctor if pregnant"] },
+    { name: "Vitamin D3 1000 IU", dosage: "Take 1 capsule daily", warnings: ["Take with fat-containing meal for better absorption"] },
+  ]);
   const [detectedMedicines, setDetectedMedicines] = useState<
     Array<{
       name: string
@@ -47,11 +52,39 @@ export default function MeditationApp() {
     { name: "Heart Medication", time: "8:00 PM", taken: false },
   ])
 
-
+const getPrescription = async (id:string) => {
+   try{
+    const response = await getPrescriptions(id);
+    console.log("Fetched prescriptions:", response);
+    return response
+   }catch(error){
+    console.error("Error fetching prescriptions:", error);
+   }
+}
   const todaysMeds = [
     { name: "Morning Vitamins", time: "8:00 AM", taken: true },
     { name: "Diabetes Medication", time: "12:00 PM", taken: true },
   ]
+
+  useEffect(() => {
+    const fetchPrescriptions = async () => {
+      const id = Cookies.get("userId");
+      if (id) {
+        const prescriptionsData = await getPrescription(id);
+        if (prescriptionsData) {
+          setPrescriptions(
+            prescriptionsData.map((item: any) => ({
+              name: item.course ?? "Unknown",
+              dosage: item.timing ?? "Unknown dosage",
+              warnings: item.stock ? [item.stock] : [],
+            }))
+          );
+        }
+      }
+    }
+    fetchPrescriptions();
+  }, []);
+  
 
   const handleImageUpload = (file: File) => {
     if (file && file.type.startsWith("image/")) {

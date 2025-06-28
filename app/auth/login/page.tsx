@@ -25,10 +25,13 @@ export default function Login() {
       toast.error("Please fill in all fields");
       return
     }
-    const response = await login(email, password);
+   try{
+     const response = await login(email, password);
     if (response.success) {
       toast.success("Login successful!");
       Cookies.set("type", response.type, { expires: 7 });
+      Cookies.set("userId", response.id, { expires: 7 });
+      Cookies.set("userInfo", JSON.stringify({ name: response.name, phoneNumber: response.phoneNumber, email: response.email }), { expires: 7 });
       Cookies.set("token", response.token, { expires: 7 }); 
      if(response.type==="doctor") {
         window.location.href = "/doctor";
@@ -36,11 +39,16 @@ export default function Login() {
         window.location.href = "/";
       }
     } else {
+      setIsLoading(false);
       toast.error( "Login failed. Please try again.");
     }
+   }catch (error) {
+    setIsLoading(false);
+    console.error("Login error:", error);
+    toast.error("An error occurred during login. Please try again later.");
+   }
 
-   
-    setTimeout(() => setIsLoading(false), 2000)
+   setTimeout(() => setIsLoading(false), 2000)
   }
   
   return (
