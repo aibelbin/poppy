@@ -12,7 +12,6 @@ import { Textarea } from "@/components/ui/textarea";
 import  {getPatientsList}  from "@/actions/doctor";
 import Cookies from "js-cookie";
 import {getPatient} from "@/actions/patient";
-import {getReports} from "@/actions/reports";
 import {
   Stethoscope,
   Calendar,
