@@ -14,6 +14,21 @@ from datetime import datetime, timedelta
 
 from reportGen import genPdf
 
+
+# import requests
+
+# def get_travel_time(origin, destination, api_key):
+#     url = "https://maps.googleapis.com/maps/api/distancematrix/json"
+#     params = {
+#         "origins": origin,                                                                ditching as I ran out of credits 
+#         "destinations": destination,
+#         "mode": "driving",
+#         "key": #ran out 
+#     }
+#     response = requests.get(url, params=params).json()
+#     seconds = response['rows'][0]['elements'][0]['duration']['value']
+#     return seconds // 60  
+
 SCOPES = ['https://www.googleapis.com/auth/calendar.events']
 
 app = FastAPI()

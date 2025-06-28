@@ -30,12 +30,19 @@ def time_diff_in_minutes(current_hhmm, key_hhmm):
 
 def send_notification(patient_id: str):
     try:
-        response = supabase.table('patients').select("*").eq("id", patient_id).execute()
-        patient = response.data[0]
-        message = client.messages.create(
+        patient_response = supabase.table('patients').select("*").eq("id", patient_id).execute()
+        caretaker_response = supabase.table('patients').select("*").eq("id", patient_id).execute()
+        patient = patient_response.data[0]
+        caretaker = caretaker_response.data[0]
+        client.messages.create(
             body="Why didn't you take your medicine? It's time to take your medicine!",
             from_=twilio_number,
             to=patient.phone_number,
+        )
+        client.messages.create(
+            body="Your parent didn't take your medicine. Please ask them to take medicine as soon as possible. Or else, they will die!!",
+            from_=twilio_number,
+            to=caretaker.phone_number,
         )
     except Exception as e:
         print(f"Error sending notification: {str(e)}")
@@ -44,7 +51,7 @@ def send_call(patient_id: str):
     try:
         response = supabase.table('patients').select("*").eq("id", patient_id).execute()
         patient = response.data[0]
-        requests.post("https://workable-epic-goshawk.ngrok-free.app/outbound-call", data={"mode": "poppy", "number": patient.phone_number})
+        requests.post("https://workable-epic-goshawk.ngrok-free.app/outbound-call", data={"mode": "missdoss", "number": patient.phone_number})
     except Exception as e:
         print(f"Error sending notification: {str(e)}")
 
@@ -57,6 +64,7 @@ def fetch_rows_with_past_timings(table_name: str) -> list:
         timing_data = row.get("timing", {})
         for key in timing_data.keys():
             if key < current_time:
+                print(f"Missed: {row['id']}")
                 diff = time_diff_in_minutes(current_time, key)
                 event_key = (row['id'], key)
                 if event_key not in triggered_events:
@@ -72,9 +80,6 @@ def fetch_rows_with_past_timings(table_name: str) -> list:
     return filtered_rows
 
 while True:
-    violated_rows = fetch_rows_with_past_timings("prescriptions")
-    for row in violated_rows:
-        print(row)
-    else:
-        print("No violations")
+    fetch_rows_with_past_timings("prescriptions")
+    print("Polling...")
     time.sleep(10)
