@@ -9,7 +9,7 @@ const google = createGoogleGenerativeAI({
     apiKey: process.env.GOOGLE_API_KEY,
 })
 
-export default async function addPersonalisation(user: Record<string, string>, data: Record<string, string>) {
+export default async function addPersonalisation(user: Record<string, string>, data: Record<string, string>, id?: string) {
     console.log(user);
     console.log(data);
     const result = await generateText({

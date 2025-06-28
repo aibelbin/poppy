@@ -4,19 +4,13 @@ import { db } from "@/db";
 import { sql, eq } from "drizzle-orm";
 import { prescriptions } from "@/db/schema";
 
-interface PrescriptionData {
-    patient: string;
-    medName: string;
-    course: string;
-    timing: Record<string, number>;
-    stock: string;
-}
 export const getPrescriptions = async (id: string) => {
     try {
         const result = await db.select()
             .from(prescriptions)
             .where(eq(prescriptions.patient, id))
             .then(results => results);
+            console.log("Prescriptions fetched:", result);
         return result;
     } catch (error) {
         console.error("Error fetching prescriptions:", error);
